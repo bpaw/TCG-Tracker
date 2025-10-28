@@ -14,6 +14,7 @@ import { useEventStore } from '../stores/eventStore';
 import { useMatchStore } from '../stores/matchStore';
 import { useDeckStore } from '../stores/deckStore';
 import { formatMatchDate } from '../utils/date';
+import EventTimelineChart from '../components/EventTimelineChart';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Event Detail'>;
 type EventDetailRouteProp = RouteProp<RootStackParamList, 'Event Detail'>;
@@ -113,6 +114,11 @@ export default function EventDetailScreen() {
             </Text>
           </View>
         </View>
+
+        {/* Timeline Chart */}
+        {eventMatches.length > 0 && (
+          <EventTimelineChart matches={eventMatches} />
+        )}
 
         {/* Rounds List */}
         <View style={styles.section}>

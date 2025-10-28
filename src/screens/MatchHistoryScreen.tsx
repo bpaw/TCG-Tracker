@@ -9,11 +9,11 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Picker } from '@react-native-picker/picker';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useDeckStore } from '../stores/deckStore';
 import { useMatchStore } from '../stores/matchStore';
 import MatchRow from '../components/MatchRow';
+import DropdownButton from '../components/DropdownButton';
 import { GameTitle, MatchResult } from '../domain/types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -50,6 +50,30 @@ export default function MatchHistoryScreen() {
 
   const availableDecks = decks.filter((d) => !d.archived);
 
+  // Dropdown options
+  const gameOptions = [
+    { label: 'All Games', value: 'all' },
+    { label: 'Magic: The Gathering', value: 'Magic: The Gathering' },
+    { label: 'Pokémon', value: 'Pokémon' },
+    { label: 'Yu-Gi-Oh!', value: 'Yu-Gi-Oh!' },
+    { label: 'Flesh and Blood', value: 'Flesh and Blood' },
+    { label: 'Lorcana', value: 'Lorcana' },
+    { label: 'One Piece', value: 'One Piece' },
+    { label: 'Other', value: 'Other' },
+  ];
+
+  const resultOptions = [
+    { label: 'All', value: 'all' },
+    { label: 'Win', value: 'WIN' },
+    { label: 'Loss', value: 'LOSS' },
+    { label: 'Tie', value: 'TIE' },
+  ];
+
+  const deckOptions = [
+    { label: 'All Decks', value: 'all' },
+    ...availableDecks.map((deck) => ({ label: deck.title, value: deck.id })),
+  ];
+
   return (
     <View style={[styles.container, isDark && styles.containerDark]}>
       {/* Header */}
@@ -63,65 +87,32 @@ export default function MatchHistoryScreen() {
       <View style={styles.filterContainer}>
         <View style={styles.filterRow}>
           <View style={[styles.filterItem, styles.filterItemLarge]}>
-            <Text style={[styles.filterLabel, isDark && styles.filterLabelDark]}>
-              Game
-            </Text>
-            <View style={[styles.picker, isDark && styles.pickerDark]}>
-              <Picker
-                selectedValue={filterGame}
-                onValueChange={(value) => setFilterGame(value as GameTitle | 'all')}
-                style={[styles.pickerInput, isDark && styles.pickerInputDark]}
-              >
-                <Picker.Item label="All Games" value="all" color="#000" />
-                <Picker.Item label="Magic: The Gathering" value="Magic: The Gathering" color="#000" />
-                <Picker.Item label="Pokémon" value="Pokémon" color="#000" />
-                <Picker.Item label="Yu-Gi-Oh!" value="Yu-Gi-Oh!" color="#000" />
-                <Picker.Item label="Flesh and Blood" value="Flesh and Blood" color="#000" />
-                <Picker.Item label="Lorcana" value="Lorcana" color="#000" />
-                <Picker.Item label="One Piece" value="One Piece" color="#000" />
-                <Picker.Item label="Other" value="Other" color="#000" />
-              </Picker>
-            </View>
+            <DropdownButton
+              label="Game"
+              value={filterGame}
+              options={gameOptions}
+              onChange={(value) => setFilterGame(value as GameTitle | 'all')}
+            />
           </View>
 
           <View style={styles.filterItem}>
-            <Text style={[styles.filterLabel, isDark && styles.filterLabelDark]}>
-              Result
-            </Text>
-            <View style={[styles.picker, isDark && styles.pickerDark]}>
-              <Picker
-                selectedValue={filterResult}
-                onValueChange={(value) =>
-                  setFilterResult(value as MatchResult | 'all')
-                }
-                style={[styles.pickerInput, isDark && styles.pickerInputDark]}
-              >
-                <Picker.Item label="All" value="all" color="#000" />
-                <Picker.Item label="Win" value="WIN" color="#000" />
-                <Picker.Item label="Loss" value="LOSS" color="#000" />
-                <Picker.Item label="Tie" value="TIE" color="#000" />
-              </Picker>
-            </View>
+            <DropdownButton
+              label="Result"
+              value={filterResult}
+              options={resultOptions}
+              onChange={(value) => setFilterResult(value as MatchResult | 'all')}
+            />
           </View>
         </View>
 
         <View style={styles.filterRow}>
           <View style={[styles.filterItem, { flex: 1 }]}>
-            <Text style={[styles.filterLabel, isDark && styles.filterLabelDark]}>
-              Deck
-            </Text>
-            <View style={[styles.picker, isDark && styles.pickerDark]}>
-              <Picker
-                selectedValue={filterDeck}
-                onValueChange={(value) => setFilterDeck(value)}
-                style={[styles.pickerInput, isDark && styles.pickerInputDark]}
-              >
-                <Picker.Item label="All Decks" value="all" color="#000" />
-                {availableDecks.map((deck) => (
-                  <Picker.Item key={deck.id} label={deck.title} value={deck.id} color="#000" />
-                ))}
-              </Picker>
-            </View>
+            <DropdownButton
+              label="Deck"
+              value={filterDeck}
+              options={deckOptions}
+              onChange={(value) => setFilterDeck(value)}
+            />
           </View>
         </View>
       </View>

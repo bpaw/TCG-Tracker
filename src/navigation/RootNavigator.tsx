@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useColorScheme } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 // Screens
 import DashboardScreen from '../screens/DashboardScreen';
@@ -47,6 +48,9 @@ function MainTabs() {
         component={DashboardScreen}
         options={{
           tabBarLabel: 'Dashboard',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="view-dashboard" size={size} color={color} />
+          ),
         }}
       />
       <Tab.Screen
@@ -54,6 +58,9 @@ function MainTabs() {
         component={MatchHistoryScreen}
         options={{
           tabBarLabel: 'History',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="history" size={size} color={color} />
+          ),
         }}
       />
       <Tab.Screen
@@ -61,6 +68,9 @@ function MainTabs() {
         component={DecksScreen}
         options={{
           tabBarLabel: 'Decks',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="cards" size={size} color={color} />
+          ),
         }}
       />
     </Tab.Navigator>

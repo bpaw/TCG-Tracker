@@ -1,4 +1,5 @@
 import { Match, Deck } from '../domain/types';
+import { format, subDays, startOfDay, isAfter, isBefore } from 'date-fns';
 
 export interface OverallRecord {
   wins: number;
@@ -104,4 +105,56 @@ export function getFirstVsSecondSplit(matches: Match[]): FirstVsSecondSplit {
     first: getWinRate(firstMatches),
     second: getWinRate(secondMatches),
   };
+}
+
+export interface DailyWinRate {
+  date: string; // YYYY-MM-DD format
+  wins: number;
+  total: number;
+  winRate: number; // 0-100
+}
+
+export function getDailyWinRates(matches: Match[], days: number = 30): DailyWinRate[] {
+  const now = new Date();
+  const startDate = startOfDay(subDays(now, days - 1));
+
+  // Filter matches within date range
+  const recentMatches = matches.filter((m) => {
+    const matchDate = new Date(m.date);
+    return isAfter(matchDate, startDate) || matchDate.getTime() === startDate.getTime();
+  });
+
+  // Group matches by date
+  const matchesByDate = new Map<string, Match[]>();
+
+  for (let i = 0; i < days; i++) {
+    const date = startOfDay(subDays(now, days - 1 - i));
+    const dateKey = format(date, 'yyyy-MM-dd');
+    matchesByDate.set(dateKey, []);
+  }
+
+  recentMatches.forEach((match) => {
+    const dateKey = format(startOfDay(new Date(match.date)), 'yyyy-MM-dd');
+    const existing = matchesByDate.get(dateKey);
+    if (existing) {
+      existing.push(match);
+    }
+  });
+
+  // Calculate daily win rates
+  const result: DailyWinRate[] = [];
+  matchesByDate.forEach((dayMatches, dateKey) => {
+    const wins = dayMatches.filter((m) => m.result === 'WIN').length;
+    const total = dayMatches.length;
+    const winRate = total > 0 ? (wins / total) * 100 : 0;
+
+    result.push({
+      date: dateKey,
+      wins,
+      total,
+      winRate,
+    });
+  });
+
+  return result;
 }

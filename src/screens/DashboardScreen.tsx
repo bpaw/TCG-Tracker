@@ -15,7 +15,8 @@ import { useEventStore } from '../stores/eventStore';
 import { useMatchStore } from '../stores/matchStore';
 import { formatMatchDate } from '../utils/date';
 import KPI from '../components/KPI';
-import { getOverallRecord, getWinRate, getFirstVsSecondSplit } from '../utils/stats';
+import WinRateChart from '../components/WinRateChart';
+import { getOverallRecord, getWinRate, getFirstVsSecondSplit, getDailyWinRates } from '../utils/stats';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -56,6 +57,7 @@ export default function DashboardScreen() {
   const record = getOverallRecord(matches);
   const winRate = getWinRate(matches);
   const firstVsSecond = getFirstVsSecondSplit(matches);
+  const dailyWinRates = getDailyWinRates(matches, 30);
 
   return (
     <View style={[styles.container, isDark && styles.containerDark]}>
@@ -85,6 +87,11 @@ export default function DashboardScreen() {
             )}
           </>
         ) : null}
+
+        {/* Win Rate Chart */}
+        {hasData && matches.length > 0 && (
+          <WinRateChart data={dailyWinRates} />
+        )}
 
         {/* Events Section */}
         {hasData && (
