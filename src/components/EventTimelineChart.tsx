@@ -2,13 +2,14 @@ import React from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { Match } from '../domain/types';
+import { useThemeStore } from '../stores/themeStore';
 
 interface EventTimelineChartProps {
   matches: Match[];
 }
 
 export default function EventTimelineChart({ matches }: EventTimelineChartProps) {
-  const isDark = false; // Force light mode
+  const { isDark } = useThemeStore();
 
   if (matches.length === 0) {
     return (

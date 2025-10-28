@@ -14,6 +14,7 @@ import { RootStackParamList } from '../navigation/RootNavigator';
 import { useDeckStore } from '../stores/deckStore';
 import { useMatchStore } from '../stores/matchStore';
 import { useUiStore } from '../stores/uiStore';
+import { useThemeStore } from '../stores/themeStore';
 import { Deck, GameTitle } from '../domain/types';
 import { getWinRate } from '../utils/stats';
 
@@ -21,7 +22,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function DecksScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const isDark = false; // Force light mode
+  const { isDark } = useThemeStore();
 
   const { decks, loadDecks, archiveDeck } = useDeckStore();
   const { matches, loadMatches } = useMatchStore();

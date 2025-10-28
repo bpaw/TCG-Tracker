@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { Match } from '../domain/types';
 import { formatMatchDate } from '../utils/date';
+import { useThemeStore } from '../stores/themeStore';
 
 interface MatchRowProps {
   match: Match;
@@ -16,7 +17,7 @@ interface MatchRowProps {
 }
 
 export default function MatchRow({ match, deckTitle, onPress }: MatchRowProps) {
-  const isDark = false; // Force light mode
+  const { isDark } = useThemeStore();
 
   const resultColor =
     match.result === 'WIN'

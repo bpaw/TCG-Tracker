@@ -3,13 +3,14 @@ import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { format, parseISO } from 'date-fns';
 import { DailyWinRate } from '../utils/stats';
+import { useThemeStore } from '../stores/themeStore';
 
 interface WinRateChartProps {
   data: DailyWinRate[];
 }
 
 export default function WinRateChart({ data }: WinRateChartProps) {
-  const isDark = false; // Force light mode
+  const { isDark } = useThemeStore();
 
   // Filter to only include days with matches for cleaner visualization
   const daysWithMatches = data.filter((d) => d.total > 0);

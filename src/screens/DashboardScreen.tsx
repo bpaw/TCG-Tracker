@@ -13,6 +13,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useEventStore } from '../stores/eventStore';
 import { useMatchStore } from '../stores/matchStore';
+import { useThemeStore } from '../stores/themeStore';
 import { formatMatchDate } from '../utils/date';
 import KPI from '../components/KPI';
 import WinRateChart from '../components/WinRateChart';
@@ -22,7 +23,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function DashboardScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const isDark = false; // Force light mode
+  const { isDark } = useThemeStore();
 
   const { events, loadEvents, loading } = useEventStore();
   const { matches, loadMatches } = useMatchStore();

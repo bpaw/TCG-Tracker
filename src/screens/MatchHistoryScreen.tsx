@@ -12,6 +12,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useDeckStore } from '../stores/deckStore';
 import { useMatchStore } from '../stores/matchStore';
+import { useThemeStore } from '../stores/themeStore';
 import MatchRow from '../components/MatchRow';
 import DropdownButton from '../components/DropdownButton';
 import { GameTitle, MatchResult } from '../domain/types';
@@ -20,7 +21,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function MatchHistoryScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const isDark = false; // Force light mode
+  const { isDark } = useThemeStore();
 
   const { decks, loadDecks } = useDeckStore();
   const { matches, loadMatches, loading } = useMatchStore();

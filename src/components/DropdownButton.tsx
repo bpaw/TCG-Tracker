@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
 } from 'react-native';
+import { useThemeStore } from '../stores/themeStore';
 
 interface DropdownOption {
   label: string;
@@ -30,7 +31,7 @@ export default function DropdownButton({
   placeholder = 'Select...',
 }: DropdownButtonProps) {
   const [modalVisible, setModalVisible] = useState(false);
-  const isDark = false; // Force light mode
+  const { isDark } = useThemeStore();
 
   const selectedOption = options.find((opt) => opt.value === value);
   const displayText = selectedOption?.label || placeholder;

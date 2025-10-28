@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useColorScheme } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useThemeStore } from '../stores/themeStore';
 
 // Screens
 import DashboardScreen from '../screens/DashboardScreen';
@@ -14,12 +15,16 @@ import MatchHistoryScreen from '../screens/MatchHistoryScreen';
 import MatchDetailScreen from '../screens/MatchDetailScreen';
 import DecksScreen from '../screens/DecksScreen';
 import EditDeckScreen from '../screens/EditDeckScreen';
+import CalendarScreen from '../screens/CalendarScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 
 // Type definitions for navigation
 export type RootTabParamList = {
   Dashboard: undefined;
   'Match History': undefined;
   Decks: undefined;
+  Calendar: undefined;
+  Profile: undefined;
 };
 
 export type RootStackParamList = {
@@ -73,12 +78,32 @@ function MainTabs() {
           ),
         }}
       />
+      <Tab.Screen
+        name="Calendar"
+        component={CalendarScreen}
+        options={{
+          tabBarLabel: 'Calendar',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="calendar" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarLabel: 'Profile',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="account" size={size} color={color} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }
 
 export default function RootNavigator() {
-  const isDark = false; // Force light mode
+  const { isDark } = useThemeStore();
 
   return (
     <NavigationContainer>

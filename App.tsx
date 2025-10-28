@@ -3,12 +3,14 @@ import { StatusBar, StyleSheet, View, useColorScheme, Text } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import RootNavigator from './src/navigation/RootNavigator';
 import { useUiStore } from './src/stores/uiStore';
+import { useThemeStore } from './src/stores/themeStore';
 
 export default function App() {
-  const isDark = false; // Force light mode
+  const { isDark, loadTheme } = useThemeStore();
   const { initialized, initialize, toast, hideToast } = useUiStore();
 
   useEffect(() => {
+    loadTheme();
     initialize();
   }, []);
 

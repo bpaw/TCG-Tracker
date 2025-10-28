@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, useColorScheme } from 'react-native';
+import { useThemeStore } from '../stores/themeStore';
 
 interface KPIProps {
   label: string;
@@ -8,7 +9,7 @@ interface KPIProps {
 }
 
 export default function KPI({ label, value, subtitle }: KPIProps) {
-  const isDark = false; // Force light mode
+  const { isDark } = useThemeStore();
 
   return (
     <View style={styles.container}>
