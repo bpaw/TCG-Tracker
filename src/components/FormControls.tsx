@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   useColorScheme,
 } from 'react-native';
+import { useThemeStore } from '../stores/themeStore';
 
 interface FormLabelProps {
   text: string;
@@ -14,7 +15,7 @@ interface FormLabelProps {
 }
 
 export function FormLabel({ text, required }: FormLabelProps) {
-  const isDark = false; // Force light mode
+  const { isDark } = useThemeStore();
 
   return (
     <Text style={[styles.label, isDark && styles.labelDark]}>
@@ -43,7 +44,7 @@ export function FormInput({
   keyboardType = 'default',
   error,
 }: FormInputProps) {
-  const isDark = false; // Force light mode
+  const { isDark } = useThemeStore();
 
   return (
     <View>

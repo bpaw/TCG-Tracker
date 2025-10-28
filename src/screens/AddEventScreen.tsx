@@ -16,6 +16,7 @@ import { Picker } from '@react-native-picker/picker';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useEventStore } from '../stores/eventStore';
 import { useUiStore } from '../stores/uiStore';
+import { useThemeStore } from '../stores/themeStore';
 import { FormLabel, FormInput } from '../components/FormControls';
 import { eventSchema, EventFormData, gameTitles } from '../validation/schemas';
 
@@ -23,7 +24,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Add Event'>
 
 export default function AddEventScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const isDark = false; // Force light mode
+  const { isDark } = useThemeStore();
 
   const { createEvent } = useEventStore();
   const { showToast } = useUiStore();
@@ -38,7 +39,7 @@ export default function AddEventScreen() {
       name: '',
       game: 'Magic: The Gathering',
       date: new Date().toISOString(),
-      totalRounds: 4,
+      totalRounds: undefined,
       notes: '',
     },
   });
@@ -118,10 +119,16 @@ export default function AddEventScreen() {
               name="totalRounds"
               render={({ field: { onChange, value } }) => (
                 <FormInput
-                  value={String(value)}
+                  value={value !== undefined ? String(value) : ''}
                   onChangeText={(text) => {
-                    const num = parseInt(text);
-                    onChange(isNaN(num) ? 1 : num);
+                    if (text === '') {
+                      onChange(undefined);
+                    } else {
+                      const num = parseInt(text, 10);
+                      if (!isNaN(num)) {
+                        onChange(num);
+                      }
+                    }
                   }}
                   placeholder="e.g., 4"
                   keyboardType="number-pad"
