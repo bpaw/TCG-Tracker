@@ -46,6 +46,10 @@ export interface Match {
   oppDeckArchetype: string;
   opponentName?: string;
 
+  // One Piece specific fields
+  onePieceLeader?: string;
+  onePieceColor?: string;
+
   result: MatchResult;
   score?: '2-0' | '2-1' | '1-2' | '0-2' | '1-1-1' | string;
   wonDieRoll?: boolean;

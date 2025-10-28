@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   useColorScheme,
   Alert,
+  Image,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -15,6 +16,7 @@ import { useDeckStore } from '../stores/deckStore';
 import { useMatchStore } from '../stores/matchStore';
 import { useUiStore } from '../stores/uiStore';
 import { formatDateTime } from '../utils/date';
+import { getLeaderImage, getColorBorderColor } from '../domain/gameTitle/onePieceAssets';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Match Detail'>;
 type MatchDetailRouteProp = RouteProp<RootStackParamList, 'Match Detail'>;
@@ -119,6 +121,32 @@ export default function MatchDetailScreen() {
             />
           )}
         </View>
+
+        {/* One Piece Leader Section */}
+        {match.game === 'One Piece' && match.onePieceLeader && match.onePieceColor && (
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+              Opponent Leader
+            </Text>
+            <View style={styles.onePieceLeaderSection}>
+              <View style={[styles.leaderImageBorder, { borderColor: getColorBorderColor(match.onePieceColor) }]}>
+                <Image
+                  source={getLeaderImage(match.onePieceLeader)}
+                  style={styles.leaderImageLarge}
+                  resizeMode="cover"
+                />
+              </View>
+              <View style={styles.leaderInfo}>
+                <Text style={[styles.leaderName, isDark && styles.leaderNameDark]}>
+                  {match.onePieceLeader}
+                </Text>
+                <Text style={[styles.leaderColor, isDark && styles.leaderColorDark]}>
+                  Color: {match.onePieceColor}
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
 
         {/* Game Details */}
         {(match.wonDieRoll !== undefined ||
@@ -386,5 +414,40 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  onePieceLeaderSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  leaderImageBorder: {
+    borderWidth: 4,
+    borderRadius: 16,
+    padding: 4,
+    overflow: 'hidden',
+  },
+  leaderImageLarge: {
+    width: 120,
+    height: 120,
+    borderRadius: 12,
+  },
+  leaderInfo: {
+    flex: 1,
+  },
+  leaderName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#000',
+    marginBottom: 4,
+  },
+  leaderNameDark: {
+    color: '#fff',
+  },
+  leaderColor: {
+    fontSize: 16,
+    color: '#8E8E93',
+  },
+  leaderColorDark: {
+    color: '#98989F',
   },
 });

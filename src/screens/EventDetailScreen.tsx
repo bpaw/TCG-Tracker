@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -15,6 +16,7 @@ import { useMatchStore } from '../stores/matchStore';
 import { useDeckStore } from '../stores/deckStore';
 import { formatMatchDate } from '../utils/date';
 import EventTimelineChart from '../components/EventTimelineChart';
+import { getLeaderImage, getColorBorderColor } from '../domain/gameTitle/onePieceAssets';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Event Detail'>;
 type EventDetailRouteProp = RouteProp<RootStackParamList, 'Event Detail'>;
@@ -143,6 +145,76 @@ export default function EventDetailScreen() {
                   ? '#FF3B30'
                   : '#FF9500';
 
+              const isOnePiece = event?.game === 'One Piece';
+
+              // For One Piece, render special card with leader image
+              if (isOnePiece && match.onePieceLeader && match.onePieceColor) {
+                const leaderImage = getLeaderImage(match.onePieceLeader);
+                const borderColor = getColorBorderColor(match.onePieceColor);
+
+                return (
+                  <TouchableOpacity
+                    key={match.id}
+                    style={[styles.roundCard, isDark && styles.roundCardDark]}
+                    onPress={() => handleMatchPress(match.id)}
+                  >
+                    <View style={styles.onePieceCardLayout}>
+                      {/* Left: Leader Image */}
+                      <View style={styles.leaderImageContainer}>
+                        <View style={[styles.leaderImageBorder, { borderColor }]}>
+                          <Image
+                            source={leaderImage}
+                            style={styles.leaderImage}
+                            resizeMode="cover"
+                          />
+                        </View>
+                      </View>
+
+                      {/* Right: Match Info */}
+                      <View style={styles.matchInfoContainer}>
+                        <View style={styles.roundHeader}>
+                          <Text style={[styles.roundNumber, isDark && styles.roundNumberDark]}>
+                            Round {match.roundNumber}
+                          </Text>
+                          <View style={[styles.resultBadge, { backgroundColor: resultColor }]}>
+                            <Text style={styles.resultText}>{match.result}</Text>
+                          </View>
+                        </View>
+
+                        <Text style={[styles.matchup, isDark && styles.matchupDark]}>
+                          {deck?.title || 'Unknown Deck'} vs {match.oppDeckArchetype}
+                        </Text>
+
+                        {match.opponentName && (
+                          <Text style={[styles.opponent, isDark && styles.opponentDark]}>
+                            vs {match.opponentName}
+                          </Text>
+                        )}
+
+                        <View style={styles.matchDetails}>
+                          {match.score && (
+                            <Text style={[styles.detailText, isDark && styles.detailTextDark]}>
+                              Score: {match.score}
+                            </Text>
+                          )}
+                          {match.wonDieRoll !== undefined && (
+                            <Text style={[styles.detailText, isDark && styles.detailTextDark]}>
+                              Die Roll: {match.wonDieRoll ? 'Won' : 'Lost'}
+                            </Text>
+                          )}
+                          {match.started && match.started !== 'UNKNOWN' && (
+                            <Text style={[styles.detailText, isDark && styles.detailTextDark]}>
+                              Started: {match.started}
+                            </Text>
+                          )}
+                        </View>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                );
+              }
+
+              // Default card layout for other games
               return (
                 <TouchableOpacity
                   key={match.id}
@@ -328,6 +400,29 @@ const styles = StyleSheet.create({
   },
   roundCardDark: {
     backgroundColor: '#1C1C1E',
+  },
+  onePieceCardLayout: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  leaderImageContainer: {
+    width: '30%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  leaderImageBorder: {
+    borderWidth: 3,
+    borderRadius: 12,
+    padding: 4,
+    overflow: 'hidden',
+  },
+  leaderImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+  },
+  matchInfoContainer: {
+    flex: 1,
   },
   roundHeader: {
     flexDirection: 'row',

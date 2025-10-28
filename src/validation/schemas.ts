@@ -41,8 +41,10 @@ export const matchSchema = z.object({
   eventId: z.string().min(1, 'Event is required'),
   roundNumber: z.number().int().min(1, 'Round number is required').max(20),
   myDeckId: z.string().min(1, 'Please select your deck'),
-  oppDeckArchetype: z.string().min(1, 'Opponent deck archetype is required').max(100),
+  oppDeckArchetype: z.string().max(100).optional(),
   opponentName: z.string().max(100).optional(),
+  onePieceLeader: z.string().optional(),
+  onePieceColor: z.string().optional(),
   result: z.enum(matchResults, {
     required_error: 'Result is required',
   }),
@@ -52,6 +54,16 @@ export const matchSchema = z.object({
   startTurnNumber: z.number().int().positive().optional(),
   notes: z.string().optional(),
   tags: z.array(z.string()).optional(),
+}).refine((data) => {
+  // For One Piece, require leader and color instead of oppDeckArchetype
+  if (data.game === 'One Piece') {
+    return data.onePieceLeader && data.onePieceColor;
+  }
+  // For other games, require oppDeckArchetype
+  return data.oppDeckArchetype && data.oppDeckArchetype.length > 0;
+}, {
+  message: 'Opponent deck information is required',
+  path: ['oppDeckArchetype'],
 });
 
 export type DeckFormData = z.infer<typeof deckSchema>;

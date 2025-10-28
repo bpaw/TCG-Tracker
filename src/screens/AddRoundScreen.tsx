@@ -17,6 +17,7 @@ import { useDeckStore } from '../stores/deckStore';
 import { useMatchStore } from '../stores/matchStore';
 import { useEventStore } from '../stores/eventStore';
 import { useUiStore } from '../stores/uiStore';
+import { useThemeStore } from '../stores/themeStore';
 import {
   FormLabel,
   FormInput,
@@ -31,6 +32,8 @@ import {
   scoreOptions,
 } from '../validation/schemas';
 import { Picker } from '@react-native-picker/picker';
+import { onePieceColors } from '../domain/gameTitle/onePiece';
+import leaders from '../data/_data/leaders.json';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Add Round'>;
 type AddRoundRouteProp = RouteProp<RootStackParamList, 'Add Round'>;
@@ -38,7 +41,7 @@ type AddRoundRouteProp = RouteProp<RootStackParamList, 'Add Round'>;
 export default function AddRoundScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<AddRoundRouteProp>();
-  const isDark = false; // Force light mode
+  const { isDark } = useThemeStore();
 
   const { eventId, roundNumber } = route.params;
   const { decks, loadDecks } = useDeckStore();
@@ -49,6 +52,7 @@ export default function AddRoundScreen() {
   const [customScore, setCustomScore] = useState('');
 
   const event = getEvent(eventId);
+  const isOnePiece = event?.game === 'One Piece';
 
   const {
     control,
@@ -81,10 +85,20 @@ export default function AddRoundScreen() {
   const onSubmit = async (data: MatchFormData) => {
     try {
       console.log('Saving round:', data);
-      await createMatch({
-        ...data,
-        tags: data.tags || [],
-      });
+
+      // For One Piece, build oppDeckArchetype from leader and color
+      const matchData = isOnePiece && data.onePieceLeader && data.onePieceColor
+        ? {
+            ...data,
+            oppDeckArchetype: `${data.onePieceLeader} - ${data.onePieceColor}`,
+            tags: data.tags || [],
+          }
+        : {
+            ...data,
+            tags: data.tags || [],
+          };
+
+      await createMatch(matchData);
       console.log('Round saved successfully, navigating back');
       showToast('Round saved successfully!', 'success');
       navigation.goBack();
@@ -160,18 +174,69 @@ export default function AddRoundScreen() {
           {/* Opponent Deck Archetype */}
           <View style={styles.field}>
             <FormLabel text="Opponent Deck Archetype" required />
-            <Controller
-              control={control}
-              name="oppDeckArchetype"
-              render={({ field: { onChange, value } }) => (
-                <FormInput
-                  value={value || ''}
-                  onChangeText={onChange}
-                  placeholder="e.g., Rakdos Midrange"
-                  error={errors.oppDeckArchetype?.message}
+            {isOnePiece ? (
+              <View>
+                <Controller
+                  control={control}
+                  name="onePieceLeader"
+                  render={({ field: { onChange, value } }) => (
+                    <View style={[styles.picker, isDark && styles.pickerDark, styles.onePiecePicker]}>
+                      <Picker
+                        selectedValue={value || ''}
+                        onValueChange={onChange}
+                        style={[styles.pickerInput, isDark && styles.pickerInputDark]}
+                      >
+                        <Picker.Item label="Select leader..." value="" color="#000" />
+                        {leaders.map((leader) => (
+                          <Picker.Item
+                            key={leader}
+                            label={leader}
+                            value={leader}
+                            color="#000"
+                          />
+                        ))}
+                      </Picker>
+                    </View>
+                  )}
                 />
-              )}
-            />
+                <Controller
+                  control={control}
+                  name="onePieceColor"
+                  render={({ field: { onChange, value } }) => (
+                    <View style={[styles.picker, isDark && styles.pickerDark]}>
+                      <Picker
+                        selectedValue={value || ''}
+                        onValueChange={onChange}
+                        style={[styles.pickerInput, isDark && styles.pickerInputDark]}
+                      >
+                        <Picker.Item label="Select color..." value="" color="#000" />
+                        {onePieceColors.map((color) => (
+                          <Picker.Item
+                            key={color}
+                            label={color}
+                            value={color}
+                            color="#000"
+                          />
+                        ))}
+                      </Picker>
+                    </View>
+                  )}
+                />
+              </View>
+            ) : (
+              <Controller
+                control={control}
+                name="oppDeckArchetype"
+                render={({ field: { onChange, value } }) => (
+                  <FormInput
+                    value={value || ''}
+                    onChangeText={onChange}
+                    placeholder="e.g., Rakdos Midrange"
+                    error={errors.oppDeckArchetype?.message}
+                  />
+                )}
+              />
+            )}
           </View>
 
           {/* Opponent Name */}
@@ -398,6 +463,9 @@ const styles = StyleSheet.create({
   },
   pickerInputDark: {
     color: '#fff',
+  },
+  onePiecePicker: {
+    marginBottom: 12,
   },
   errorText: {
     color: '#FF3B30',
