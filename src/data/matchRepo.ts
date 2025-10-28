@@ -1,6 +1,7 @@
 import * as Crypto from 'expo-crypto';
 import { Match, GameTitle, MatchResult } from '../domain/types';
 import { getItem, setItem, STORAGE_KEYS } from './asyncStorage';
+import * as CalendarRepo from './calendarRepo';
 
 // TODO: migrate to SQLite later for better querying and performance
 // Keep these function signatures stable for easy migration
@@ -62,6 +63,9 @@ export async function create(
   matches.push(newMatch);
   await setItem(STORAGE_KEYS.MATCHES, matches);
 
+  // Dual write to calendar
+  await CalendarRepo.addMatchToCalendar(newMatch.id, newMatch.date);
+
   return newMatch;
 }
 
@@ -74,8 +78,10 @@ export async function update(id: string, data: Partial<Match>): Promise<Match | 
     return null;
   }
 
+  const oldMatch = matches[index];
+
   const updatedMatch: Match = {
-    ...matches[index],
+    ...oldMatch,
     ...data,
     id, // ensure id cannot be changed
     updatedAt: new Date().toISOString(),
@@ -83,6 +89,12 @@ export async function update(id: string, data: Partial<Match>): Promise<Match | 
 
   matches[index] = updatedMatch;
   await setItem(STORAGE_KEYS.MATCHES, matches);
+
+  // Update calendar if date changed
+  if (oldMatch.date !== updatedMatch.date) {
+    await CalendarRepo.removeMatchFromCalendar(id, oldMatch.date);
+    await CalendarRepo.addMatchToCalendar(id, updatedMatch.date);
+  }
 
   return updatedMatch;
 }
@@ -96,8 +108,13 @@ export async function remove(id: string): Promise<boolean> {
     return false;
   }
 
+  const matchToRemove = matches[index];
+
   matches.splice(index, 1);
   await setItem(STORAGE_KEYS.MATCHES, matches);
+
+  // Remove from calendar
+  await CalendarRepo.removeMatchFromCalendar(id, matchToRemove.date);
 
   return true;
 }

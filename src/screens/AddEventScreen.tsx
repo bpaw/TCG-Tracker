@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Picker } from '@react-native-picker/picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useEventStore } from '../stores/eventStore';
 import { useUiStore } from '../stores/uiStore';
@@ -29,16 +30,21 @@ export default function AddEventScreen() {
   const { createEvent } = useEventStore();
   const { showToast } = useUiStore();
 
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
+    watch,
   } = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
       name: '',
       game: 'Magic: The Gathering',
-      date: new Date().toISOString(),
+      startDate: new Date().toISOString(),
+      endDate: new Date().toISOString(),
       totalRounds: undefined,
       notes: '',
     },
@@ -108,6 +114,103 @@ export default function AddEventScreen() {
             />
             {errors.game && (
               <Text style={styles.errorText}>{errors.game.message}</Text>
+            )}
+          </View>
+
+          {/* Start Date */}
+          <View style={styles.field}>
+            <FormLabel text="Start Date" required />
+            <Controller
+              control={control}
+              name="startDate"
+              render={({ field: { onChange, value } }) => (
+                <View>
+                  <TouchableOpacity
+                    style={[styles.dateButton, isDark && styles.dateButtonDark]}
+                    onPress={() => setShowStartPicker(true)}
+                  >
+                    <Text style={[styles.dateButtonText, isDark && styles.dateButtonTextDark]}>
+                      {new Date(value).toLocaleDateString()}
+                    </Text>
+                  </TouchableOpacity>
+                  {showStartPicker && (
+                    <DateTimePicker
+                      value={new Date(value)}
+                      mode="date"
+                      display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                      textColor={isDark ? '#fff' : '#000'}
+                      onChange={(event, selectedDate) => {
+                        if (Platform.OS === 'android') {
+                          setShowStartPicker(false);
+                        }
+                        if (event.type === 'set' && selectedDate) {
+                          onChange(selectedDate.toISOString());
+                        }
+                      }}
+                    />
+                  )}
+                  {showStartPicker && Platform.OS === 'ios' && (
+                    <TouchableOpacity
+                      style={styles.doneButton}
+                      onPress={() => setShowStartPicker(false)}
+                    >
+                      <Text style={styles.doneButtonText}>Done</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
+            />
+            {errors.startDate && (
+              <Text style={styles.errorText}>{errors.startDate.message}</Text>
+            )}
+          </View>
+
+          {/* End Date */}
+          <View style={styles.field}>
+            <FormLabel text="End Date" required />
+            <Controller
+              control={control}
+              name="endDate"
+              render={({ field: { onChange, value } }) => (
+                <View>
+                  <TouchableOpacity
+                    style={[styles.dateButton, isDark && styles.dateButtonDark]}
+                    onPress={() => setShowEndPicker(true)}
+                  >
+                    <Text style={[styles.dateButtonText, isDark && styles.dateButtonTextDark]}>
+                      {new Date(value).toLocaleDateString()}
+                    </Text>
+                  </TouchableOpacity>
+                  {showEndPicker && (
+                    <DateTimePicker
+                      value={new Date(value)}
+                      mode="date"
+                      display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                      textColor={isDark ? '#fff' : '#000'}
+                      minimumDate={new Date(watch('startDate'))}
+                      onChange={(event, selectedDate) => {
+                        if (Platform.OS === 'android') {
+                          setShowEndPicker(false);
+                        }
+                        if (event.type === 'set' && selectedDate) {
+                          onChange(selectedDate.toISOString());
+                        }
+                      }}
+                    />
+                  )}
+                  {showEndPicker && Platform.OS === 'ios' && (
+                    <TouchableOpacity
+                      style={styles.doneButton}
+                      onPress={() => setShowEndPicker(false)}
+                    >
+                      <Text style={styles.doneButtonText}>Done</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
+            />
+            {errors.endDate && (
+              <Text style={styles.errorText}>{errors.endDate.message}</Text>
             )}
           </View>
 
@@ -248,6 +351,38 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   saveButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  dateButton: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#D1D1D6',
+    borderRadius: 8,
+    padding: 12,
+    minHeight: 44,
+    justifyContent: 'center',
+  },
+  dateButtonDark: {
+    backgroundColor: '#1C1C1E',
+    borderColor: '#38383A',
+  },
+  dateButtonText: {
+    fontSize: 16,
+    color: '#000',
+  },
+  dateButtonTextDark: {
+    color: '#fff',
+  },
+  doneButton: {
+    backgroundColor: '#007AFF',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  doneButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',

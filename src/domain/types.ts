@@ -26,7 +26,8 @@ export interface Event {
   id: ID;
   name: string;            // "FNM - Modern", "Prerelease"
   game: GameTitle;
-  date: string;            // ISO
+  startDate: string;       // ISO - first day of event
+  endDate: string;         // ISO - last day of event
   totalRounds: number;     // Dynamic number of rounds
   notes?: string;
   createdAt: string;       // ISO
@@ -66,4 +67,11 @@ export interface Match {
 export interface AppMeta {
   seeded: boolean;
   version: string;
+}
+
+// Reverse index for calendar: maps date (YYYY-MM-DD) to events and rounds
+export interface DateCalendar {
+  date: string;            // YYYY-MM-DD format
+  eventIds: ID[];          // Events that span this date
+  matchIds: ID[];          // Rounds that occur on this date
 }

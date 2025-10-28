@@ -44,6 +44,19 @@ export default function EventDetailScreen() {
     .filter((m) => m.eventId === eventId)
     .sort((a, b) => a.roundNumber - b.roundNumber);
 
+  // Group matches by date
+  const matchesByDate = eventMatches.reduce((acc, match) => {
+    const dateKey = match.date.split('T')[0]; // Get just the date part
+    if (!acc[dateKey]) {
+      acc[dateKey] = [];
+    }
+    acc[dateKey].push(match);
+    return acc;
+  }, {} as Record<string, typeof eventMatches>);
+
+  // Sort dates
+  const sortedDates = Object.keys(matchesByDate).sort();
+
   const completedRounds = new Set(eventMatches.map((m) => m.roundNumber));
   const nextRound = (() => {
     for (let i = 1; i <= (event?.totalRounds || 0); i++) {
@@ -88,7 +101,8 @@ export default function EventDetailScreen() {
             {event.name}
           </Text>
           <Text style={[styles.eventMeta, isDark && styles.eventMetaDark]}>
-            {event.game} • {formatMatchDate(event.date)}
+            {event.game} • {formatMatchDate(event.startDate)}
+            {event.startDate.split('T')[0] !== event.endDate.split('T')[0] && ` - ${formatMatchDate(event.endDate)}`}
           </Text>
           {event.notes && (
             <Text style={[styles.eventNotes, isDark && styles.eventNotesDark]}>
@@ -136,42 +150,105 @@ export default function EventDetailScreen() {
           </View>
 
           {eventMatches.length > 0 ? (
-            eventMatches.map((match) => {
-              const deck = decks.find((d) => d.id === match.myDeckId);
-              const resultColor =
-                match.result === 'WIN'
-                  ? '#34C759'
-                  : match.result === 'LOSS'
-                  ? '#FF3B30'
-                  : '#FF9500';
+            sortedDates.map((dateKey, index) => {
+              const dateMatches = matchesByDate[dateKey];
+              return (
+                <View key={dateKey}>
+                  {/* Date Subheader */}
+                  <Text style={[
+                    styles.dateSubheader,
+                    isDark && styles.dateSubheaderDark,
+                    index === 0 && styles.dateSubheaderFirst
+                  ]}>
+                    {formatMatchDate(dateKey)}
+                  </Text>
 
-              const isOnePiece = event?.game === 'One Piece';
+                  {/* Rounds for this date */}
+                  {dateMatches.map((match) => {
+                    const deck = decks.find((d) => d.id === match.myDeckId);
+                    const resultColor =
+                      match.result === 'WIN'
+                        ? '#34C759'
+                        : match.result === 'LOSS'
+                        ? '#FF3B30'
+                        : '#FF9500';
 
-              // For One Piece, render special card with leader image
-              if (isOnePiece && match.onePieceLeader && match.onePieceColor) {
-                const leaderImage = getLeaderImage(match.onePieceLeader);
-                const borderColor = getColorBorderColor(match.onePieceColor);
+                    const isOnePiece = event?.game === 'One Piece';
 
-                return (
-                  <TouchableOpacity
-                    key={match.id}
-                    style={[styles.roundCard, isDark && styles.roundCardDark]}
-                    onPress={() => handleMatchPress(match.id)}
-                  >
-                    <View style={styles.onePieceCardLayout}>
-                      {/* Left: Leader Image */}
-                      <View style={styles.leaderImageContainer}>
-                        <View style={[styles.leaderImageBorder, { borderColor }]}>
-                          <Image
-                            source={leaderImage}
-                            style={styles.leaderImage}
-                            resizeMode="cover"
-                          />
-                        </View>
-                      </View>
+                    // For One Piece, render special card with leader image
+                    if (isOnePiece && match.onePieceLeader && match.onePieceColor) {
+                      const leaderImage = getLeaderImage(match.onePieceLeader);
+                      const borderColor = getColorBorderColor(match.onePieceColor);
 
-                      {/* Right: Match Info */}
-                      <View style={styles.matchInfoContainer}>
+                      return (
+                        <TouchableOpacity
+                          key={match.id}
+                          style={[styles.roundCard, isDark && styles.roundCardDark]}
+                          onPress={() => handleMatchPress(match.id)}
+                        >
+                          <View style={styles.onePieceCardLayout}>
+                            {/* Left: Leader Image */}
+                            <View style={styles.leaderImageContainer}>
+                              <View style={[styles.leaderImageBorder, { borderColor }]}>
+                                <Image
+                                  source={leaderImage}
+                                  style={styles.leaderImage}
+                                  resizeMode="cover"
+                                />
+                              </View>
+                            </View>
+
+                            {/* Right: Match Info */}
+                            <View style={styles.matchInfoContainer}>
+                              <View style={styles.roundHeader}>
+                                <Text style={[styles.roundNumber, isDark && styles.roundNumberDark]}>
+                                  Round {match.roundNumber}
+                                </Text>
+                                <View style={[styles.resultBadge, { backgroundColor: resultColor }]}>
+                                  <Text style={styles.resultText}>{match.result}</Text>
+                                </View>
+                              </View>
+
+                              <Text style={[styles.matchup, isDark && styles.matchupDark]}>
+                                {deck?.title || 'Unknown Deck'} vs {match.oppDeckArchetype}
+                              </Text>
+
+                              {match.opponentName && (
+                                <Text style={[styles.opponent, isDark && styles.opponentDark]}>
+                                  vs {match.opponentName}
+                                </Text>
+                              )}
+
+                              <View style={styles.matchDetails}>
+                                {match.score && (
+                                  <Text style={[styles.detailText, isDark && styles.detailTextDark]}>
+                                    Score: {match.score}
+                                  </Text>
+                                )}
+                                {match.wonDieRoll !== undefined && (
+                                  <Text style={[styles.detailText, isDark && styles.detailTextDark]}>
+                                    Die Roll: {match.wonDieRoll ? 'Won' : 'Lost'}
+                                  </Text>
+                                )}
+                                {match.started && match.started !== 'UNKNOWN' && (
+                                  <Text style={[styles.detailText, isDark && styles.detailTextDark]}>
+                                    Started: {match.started}
+                                  </Text>
+                                )}
+                              </View>
+                            </View>
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    }
+
+                    // Default card layout for other games
+                    return (
+                      <TouchableOpacity
+                        key={match.id}
+                        style={[styles.roundCard, isDark && styles.roundCardDark]}
+                        onPress={() => handleMatchPress(match.id)}
+                      >
                         <View style={styles.roundHeader}>
                           <Text style={[styles.roundNumber, isDark && styles.roundNumberDark]}>
                             Round {match.roundNumber}
@@ -208,56 +285,10 @@ export default function EventDetailScreen() {
                             </Text>
                           )}
                         </View>
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                );
-              }
-
-              // Default card layout for other games
-              return (
-                <TouchableOpacity
-                  key={match.id}
-                  style={[styles.roundCard, isDark && styles.roundCardDark]}
-                  onPress={() => handleMatchPress(match.id)}
-                >
-                  <View style={styles.roundHeader}>
-                    <Text style={[styles.roundNumber, isDark && styles.roundNumberDark]}>
-                      Round {match.roundNumber}
-                    </Text>
-                    <View style={[styles.resultBadge, { backgroundColor: resultColor }]}>
-                      <Text style={styles.resultText}>{match.result}</Text>
-                    </View>
-                  </View>
-
-                  <Text style={[styles.matchup, isDark && styles.matchupDark]}>
-                    {deck?.title || 'Unknown Deck'} vs {match.oppDeckArchetype}
-                  </Text>
-
-                  {match.opponentName && (
-                    <Text style={[styles.opponent, isDark && styles.opponentDark]}>
-                      vs {match.opponentName}
-                    </Text>
-                  )}
-
-                  <View style={styles.matchDetails}>
-                    {match.score && (
-                      <Text style={[styles.detailText, isDark && styles.detailTextDark]}>
-                        Score: {match.score}
-                      </Text>
-                    )}
-                    {match.wonDieRoll !== undefined && (
-                      <Text style={[styles.detailText, isDark && styles.detailTextDark]}>
-                        Die Roll: {match.wonDieRoll ? 'Won' : 'Lost'}
-                      </Text>
-                    )}
-                    {match.started && match.started !== 'UNKNOWN' && (
-                      <Text style={[styles.detailText, isDark && styles.detailTextDark]}>
-                        Started: {match.started}
-                      </Text>
-                    )}
-                  </View>
-                </TouchableOpacity>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
               );
             })
           ) : (
@@ -380,6 +411,21 @@ const styles = StyleSheet.create({
   },
   sectionTitleDark: {
     color: '#fff',
+  },
+  dateSubheader: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#8E8E93',
+    textTransform: 'uppercase',
+    marginTop: 16,
+    marginBottom: 8,
+    letterSpacing: 0.5,
+  },
+  dateSubheaderDark: {
+    color: '#98989F',
+  },
+  dateSubheaderFirst: {
+    marginTop: 0,
   },
   addButton: {
     backgroundColor: '#007AFF',

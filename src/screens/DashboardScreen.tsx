@@ -122,7 +122,7 @@ export default function DashboardScreen() {
                       {event.name}
                     </Text>
                     <Text style={[styles.eventDate, isDark && styles.eventDateDark]}>
-                      {formatMatchDate(event.date)}
+                      {formatMatchDate(event.startDate)}
                     </Text>
                   </View>
 

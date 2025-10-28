@@ -61,7 +61,8 @@ async function seedData(): Promise<void> {
   const fnmModern = await EventRepo.create({
     name: 'FNM - Modern',
     game: 'Magic: The Gathering',
-    date: subDays(now, 1).toISOString(),
+    startDate: subDays(now, 1).toISOString(),
+    endDate: subDays(now, 1).toISOString(),
     totalRounds: 4,
     notes: 'Friday Night Magic at local game store',
   });
@@ -69,7 +70,8 @@ async function seedData(): Promise<void> {
   const modernRCQ = await EventRepo.create({
     name: 'Regional Championship Qualifier',
     game: 'Magic: The Gathering',
-    date: subDays(now, 7).toISOString(),
+    startDate: subDays(now, 7).toISOString(),
+    endDate: subDays(now, 7).toISOString(),
     totalRounds: 6,
     notes: 'Competitive Modern tournament - Top 8 gets invite',
   });
@@ -77,7 +79,8 @@ async function seedData(): Promise<void> {
   const pokemonPrerelease = await EventRepo.create({
     name: 'Scarlet & Violet Prerelease',
     game: 'Pokémon',
-    date: subDays(now, 14).toISOString(),
+    startDate: subDays(now, 14).toISOString(),
+    endDate: subDays(now, 14).toISOString(),
     totalRounds: 3,
     notes: 'Sealed format with new set',
   });
@@ -85,7 +88,8 @@ async function seedData(): Promise<void> {
   const pokemonLeague = await EventRepo.create({
     name: 'Pokémon League Cup',
     game: 'Pokémon',
-    date: subDays(now, 5).toISOString(),
+    startDate: subDays(now, 5).toISOString(),
+    endDate: subDays(now, 5).toISOString(),
     totalRounds: 5,
     notes: 'Weekly league event - Standard format',
   });
@@ -93,7 +97,8 @@ async function seedData(): Promise<void> {
   const yugiohLocals = await EventRepo.create({
     name: 'Yu-Gi-Oh! Locals',
     game: 'Yu-Gi-Oh!',
-    date: subDays(now, 3).toISOString(),
+    startDate: subDays(now, 3).toISOString(),
+    endDate: subDays(now, 3).toISOString(),
     totalRounds: 4,
     notes: 'Casual locals tournament',
   });
@@ -101,7 +106,8 @@ async function seedData(): Promise<void> {
   const storeChampionship = await EventRepo.create({
     name: 'Store Championship',
     game: 'Magic: The Gathering',
-    date: subDays(now, 21).toISOString(),
+    startDate: subDays(now, 21).toISOString(),
+    endDate: subDays(now, 21).toISOString(),
     totalRounds: 5,
     notes: 'Quarterly championship - winner gets playmat',
   });

@@ -28,9 +28,16 @@ export const eventSchema = z.object({
   game: z.enum(gameTitles, {
     required_error: 'Please select a game',
   }),
-  date: z.string().min(1, 'Date is required'),
+  startDate: z.string().min(1, 'Start date is required'),
+  endDate: z.string().min(1, 'End date is required'),
   totalRounds: z.number().int().min(1, 'Must have at least 1 round').max(20, 'Max 20 rounds'),
   notes: z.string().optional(),
+}).refine((data) => {
+  // Validate that endDate is not before startDate
+  return new Date(data.endDate) >= new Date(data.startDate);
+}, {
+  message: 'End date must be on or after start date',
+  path: ['endDate'],
 });
 
 export const matchSchema = z.object({
