@@ -300,6 +300,8 @@ const styles = StyleSheet.create({
   },
   eventCardContent: {
     backgroundColor: colors.surface[400],
+    borderLeftWidth: 3,
+    borderLeftColor: colors.brand.amber,
   },
   roundsContainer: {
     marginTop: spacing.md,

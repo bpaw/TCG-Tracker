@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
+import { Circle } from 'react-native-svg';
 import { Match } from '../domain/types';
 import { colors, spacing } from '../design/tokens';
 
@@ -22,14 +23,19 @@ export default function EventTimelineChart({ matches }: EventTimelineChartProps)
   // Sort matches by round number
   const sortedMatches = [...matches].sort((a, b) => a.roundNumber - b.roundNumber);
 
-  // Convert results to binary: WIN/TIE = 1, LOSS = 0
+  // Map results to three levels: WIN = 1.0, TIE = 0.5, LOSS = 0
   const chartData = {
     labels: sortedMatches.map((m) => `R${m.roundNumber}`),
     datasets: [
       {
-        data: sortedMatches.map((m) => (m.result === 'LOSS' ? 0 : 1)),
-        color: (opacity = 1) => `rgba(124, 77, 255, ${opacity})`, // Electric violet
-        strokeWidth: 3,
+        data: sortedMatches.map((m) => {
+          if (m.result === 'WIN') return 1.0;
+          if (m.result === 'TIE') return 0.5;
+          return 0;
+        }),
+        color: (opacity = 1) => colors.brand.violet, // Electric violet line
+        strokeWidth: 2,
+        withDots: true,
       },
     ],
   };
@@ -63,10 +69,8 @@ export default function EventTimelineChart({ matches }: EventTimelineChartProps)
             borderRadius: 16,
           },
           propsForDots: {
-            r: '5',
-            strokeWidth: '2',
-            stroke: colors.brand.violet,
-            fill: colors.brand.violet,
+            r: '0', // Hide default dots, we'll render custom ones
+            strokeWidth: '0',
           },
           propsForBackgroundLines: {
             strokeDasharray: '',
@@ -74,11 +78,42 @@ export default function EventTimelineChart({ matches }: EventTimelineChartProps)
             strokeWidth: 1,
           },
         }}
+        decorator={(decoratorData) => {
+          return decoratorData?.[0]?.data?.map((value: any, index: number) => {
+            const match = sortedMatches[index];
+            if (!match) return null;
+
+            const dotColor =
+              match.result === 'WIN'
+                ? colors.brand.emerald
+                : match.result === 'TIE'
+                ? colors.brand.amber
+                : colors.brand.coral;
+
+            return (
+              <Circle
+                key={`dot-${index}`}
+                cx={value.x}
+                cy={value.y}
+                r="5"
+                fill={dotColor}
+                stroke={dotColor}
+                strokeWidth="2"
+              />
+            );
+          });
+        }}
+        formatYLabel={(value) => {
+          if (value === '1') return 'Win';
+          if (value === '0.5') return 'Tie';
+          if (value === '0') return 'Loss';
+          return '';
+        }}
         style={styles.chart}
         yAxisLabel=""
         yAxisSuffix=""
         fromZero
-        segments={1}
+        segments={2}
         withInnerLines={true}
         withOuterLines={true}
       />
@@ -86,13 +121,19 @@ export default function EventTimelineChart({ matches }: EventTimelineChartProps)
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: colors.brand.emerald }]} />
           <Text style={styles.legendText}>
-            Win (1)
+            Win
+          </Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, { backgroundColor: colors.brand.amber }]} />
+          <Text style={styles.legendText}>
+            Tie
           </Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: colors.brand.coral }]} />
           <Text style={styles.legendText}>
-            Loss (0)
+            Loss
           </Text>
         </View>
       </View>

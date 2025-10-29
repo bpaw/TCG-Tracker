@@ -15,7 +15,6 @@ import { useEventStore } from '../stores/eventStore';
 import { useMatchStore } from '../stores/matchStore';
 import { useDeckStore } from '../stores/deckStore';
 import { formatMatchDate } from '../utils/date';
-import EventTimelineChart from '../components/EventTimelineChart';
 import { getLeaderImage, getColorBorderColor } from '../domain/gameTitle/onePieceAssets';
 import { colors, spacing } from '../design/tokens';
 import { Title, H2, Body, Caption } from '../components/atoms/Text';
@@ -134,10 +133,6 @@ export default function EventDetailScreen() {
           </Card>
         </View>
 
-        {/* Timeline Chart */}
-        {eventMatches.length > 0 && (
-          <EventTimelineChart matches={eventMatches} />
-        )}
 
         {/* Rounds List */}
         <View style={styles.section}>
