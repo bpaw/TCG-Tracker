@@ -2,6 +2,7 @@ import * as Crypto from 'expo-crypto';
 import { Match, GameTitle, MatchResult } from '../../../domain/types';
 import { Repository } from '../interfaces';
 import { getDatabase } from './database';
+import { useAuthStore } from '../../../stores/authStore';
 
 export interface MatchFilters {
   game?: GameTitle;
@@ -12,11 +13,20 @@ export interface MatchFilters {
 }
 
 export class SQLiteMatchRepository implements Repository<Match> {
+  private getCurrentUserId(): string | null {
+    return useAuthStore.getState().user?.id || null;
+  }
+
   async list(filters?: MatchFilters): Promise<Match[]> {
     const db = await getDatabase();
+    const userId = this.getCurrentUserId();
 
-    let sql = 'SELECT * FROM matches WHERE 1=1';
-    const params: any[] = [];
+    if (!userId) {
+      return [];
+    }
+
+    let sql = 'SELECT * FROM matches WHERE user_id = ?';
+    const params: any[] = [userId];
 
     if (filters) {
       if (filters.game) {
@@ -55,9 +65,15 @@ export class SQLiteMatchRepository implements Repository<Match> {
 
   async get(id: string): Promise<Match | null> {
     const db = await getDatabase();
+    const userId = this.getCurrentUserId();
+
+    if (!userId) {
+      return null;
+    }
+
     const match = await db.getFirstAsync<any>(
-      'SELECT * FROM matches WHERE id = ?',
-      [id]
+      'SELECT * FROM matches WHERE id = ? AND user_id = ?',
+      [id, userId]
     );
 
     if (!match) return null;
@@ -72,23 +88,30 @@ export class SQLiteMatchRepository implements Repository<Match> {
 
   async create(data: Omit<Match, 'id' | 'createdAt' | 'updatedAt'>): Promise<Match> {
     const db = await getDatabase();
+    const userId = this.getCurrentUserId();
     const now = new Date().toISOString();
+
+    if (!userId) {
+      throw new Error('User not authenticated');
+    }
 
     const newMatch: Match = {
       ...data,
       id: Crypto.randomUUID(),
+      user_id: userId,
       createdAt: now,
       updatedAt: now,
     };
 
     await db.runAsync(
       `INSERT INTO matches (
-        id, eventId, game, myDeckId, oppDeckArchetype, opponentName, result, score,
+        id, user_id, eventId, game, myDeckId, oppDeckArchetype, opponentName, result, score,
         wonDieRoll, started, onThePlay, roundNumber, date, notes, onePieceLeader,
         onePieceColor, createdAt, updatedAt
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         newMatch.id,
+        newMatch.user_id,
         newMatch.eventId || null,
         newMatch.game,
         newMatch.myDeckId || null,
@@ -117,6 +140,9 @@ export class SQLiteMatchRepository implements Repository<Match> {
 
   async update(id: string, data: Partial<Match>): Promise<Match | null> {
     const db = await getDatabase();
+    const userId = this.getCurrentUserId();
+    if (!userId) return null;
+
     const existing = await this.get(id);
     if (!existing) return null;
 
@@ -124,6 +150,7 @@ export class SQLiteMatchRepository implements Repository<Match> {
       ...existing,
       ...data,
       id, // ensure id cannot be changed
+      user_id: existing.user_id, // ensure user_id cannot be changed
       updatedAt: new Date().toISOString(),
     };
 
@@ -133,7 +160,7 @@ export class SQLiteMatchRepository implements Repository<Match> {
            result = ?, score = ?, wonDieRoll = ?, started = ?, onThePlay = ?,
            roundNumber = ?, date = ?, notes = ?, onePieceLeader = ?, onePieceColor = ?,
            updatedAt = ?
-       WHERE id = ?`,
+       WHERE id = ? AND user_id = ?`,
       [
         updatedMatch.eventId || null,
         updatedMatch.game,
@@ -152,6 +179,7 @@ export class SQLiteMatchRepository implements Repository<Match> {
         updatedMatch.onePieceColor || null,
         updatedMatch.updatedAt,
         id,
+        userId,
       ]
     );
 
@@ -166,10 +194,13 @@ export class SQLiteMatchRepository implements Repository<Match> {
 
   async remove(id: string): Promise<boolean> {
     const db = await getDatabase();
+    const userId = this.getCurrentUserId();
+    if (!userId) return false;
+
     const existing = await this.get(id);
     if (!existing) return false;
 
-    await db.runAsync('DELETE FROM matches WHERE id = ?', [id]);
+    await db.runAsync('DELETE FROM matches WHERE id = ? AND user_id = ?', [id, userId]);
 
     // Remove from calendar index
     await this.removeFromCalendarIndex(id, existing.date);

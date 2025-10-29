@@ -2,41 +2,66 @@ import * as Crypto from 'expo-crypto';
 import { Event } from '../../../domain/types';
 import { Repository } from '../interfaces';
 import { getDatabase } from './database';
+import { useAuthStore } from '../../../stores/authStore';
 
 export class SQLiteEventRepository implements Repository<Event> {
+  private getCurrentUserId(): string | null {
+    return useAuthStore.getState().user?.id || null;
+  }
+
   async list(): Promise<Event[]> {
     const db = await getDatabase();
+    const userId = this.getCurrentUserId();
+
+    if (!userId) {
+      return [];
+    }
+
     const events = await db.getAllAsync<Event>(
-      'SELECT * FROM events ORDER BY startDate DESC'
+      'SELECT * FROM events WHERE user_id = ? ORDER BY startDate DESC',
+      [userId]
     );
     return events;
   }
 
   async get(id: string): Promise<Event | null> {
     const db = await getDatabase();
+    const userId = this.getCurrentUserId();
+
+    if (!userId) {
+      return null;
+    }
+
     const event = await db.getFirstAsync<Event>(
-      'SELECT * FROM events WHERE id = ?',
-      [id]
+      'SELECT * FROM events WHERE id = ? AND user_id = ?',
+      [id, userId]
     );
     return event || null;
   }
 
   async create(data: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>): Promise<Event> {
     const db = await getDatabase();
+    const userId = this.getCurrentUserId();
     const now = new Date().toISOString();
+
+    if (!userId) {
+      throw new Error('User not authenticated');
+    }
 
     const newEvent: Event = {
       ...data,
       id: Crypto.randomUUID(),
+      user_id: userId,
       createdAt: now,
       updatedAt: now,
     };
 
     await db.runAsync(
-      `INSERT INTO events (id, name, game, startDate, endDate, totalRounds, notes, createdAt, updatedAt)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO events (id, user_id, name, game, startDate, endDate, totalRounds, notes, createdAt, updatedAt)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         newEvent.id,
+        newEvent.user_id,
         newEvent.name,
         newEvent.game,
         newEvent.startDate,
@@ -56,6 +81,9 @@ export class SQLiteEventRepository implements Repository<Event> {
 
   async update(id: string, data: Partial<Event>): Promise<Event | null> {
     const db = await getDatabase();
+    const userId = this.getCurrentUserId();
+    if (!userId) return null;
+
     const existing = await this.get(id);
     if (!existing) return null;
 
@@ -63,13 +91,14 @@ export class SQLiteEventRepository implements Repository<Event> {
       ...existing,
       ...data,
       id, // ensure id cannot be changed
+      user_id: existing.user_id, // ensure user_id cannot be changed
       updatedAt: new Date().toISOString(),
     };
 
     await db.runAsync(
       `UPDATE events
        SET name = ?, game = ?, startDate = ?, endDate = ?, totalRounds = ?, notes = ?, updatedAt = ?
-       WHERE id = ?`,
+       WHERE id = ? AND user_id = ?`,
       [
         updatedEvent.name,
         updatedEvent.game,
@@ -79,6 +108,7 @@ export class SQLiteEventRepository implements Repository<Event> {
         updatedEvent.notes || null,
         updatedEvent.updatedAt,
         id,
+        userId,
       ]
     );
 
@@ -93,10 +123,13 @@ export class SQLiteEventRepository implements Repository<Event> {
 
   async remove(id: string): Promise<boolean> {
     const db = await getDatabase();
+    const userId = this.getCurrentUserId();
+    if (!userId) return false;
+
     const existing = await this.get(id);
     if (!existing) return false;
 
-    await db.runAsync('DELETE FROM events WHERE id = ?', [id]);
+    await db.runAsync('DELETE FROM events WHERE id = ? AND user_id = ?', [id, userId]);
 
     // Remove from calendar index
     await this.removeFromCalendarIndex(id, existing.startDate, existing.endDate);
