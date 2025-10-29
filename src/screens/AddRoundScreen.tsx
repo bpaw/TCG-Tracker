@@ -165,13 +165,13 @@ export default function AddRoundScreen() {
                     onValueChange={onChange}
                     style={styles.pickerInput}
                   >
-                    <Picker.Item label="Select a deck..." value="" color="#000" />
+                    <Picker.Item label="Select a deck..." value="" color={colors.text.primary} />
                     {activeDecks.map((deck) => (
                       <Picker.Item
                         key={deck.id}
                         label={deck.title}
                         value={deck.id}
-                        color="#000"
+                        color={colors.text.primary}
                       />
                     ))}
                   </Picker>
@@ -246,13 +246,13 @@ export default function AddRoundScreen() {
                         onValueChange={onChange}
                         style={styles.pickerInput}
                       >
-                        <Picker.Item label="Select leader..." value="" color="#000" />
+                        <Picker.Item label="Select leader..." value="" color={colors.text.primary} />
                         {leaders.map((leader) => (
                           <Picker.Item
                             key={leader}
                             label={leader}
                             value={leader}
-                            color="#000"
+                            color={colors.text.primary}
                           />
                         ))}
                       </Picker>
@@ -269,13 +269,13 @@ export default function AddRoundScreen() {
                         onValueChange={onChange}
                         style={styles.pickerInput}
                       >
-                        <Picker.Item label="Select color..." value="" color="#000" />
+                        <Picker.Item label="Select color..." value="" color={colors.text.primary} />
                         {onePieceColors.map((color) => (
                           <Picker.Item
                             key={color}
                             label={color}
                             value={color}
-                            color="#000"
+                            color={colors.text.primary}
                           />
                         ))}
                       </Picker>

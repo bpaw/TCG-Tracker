@@ -4,6 +4,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Match } from '../domain/types';
 import { formatMatchDate } from '../utils/date';
 import { colors, spacing } from '../design/tokens';
@@ -60,9 +61,16 @@ export default function MatchRow({ match, deckTitle, onPress }: MatchRowProps) {
             </View>
           )}
           {match.wonDieRoll !== undefined && (
-            <Caption style={styles.dieRoll}>
-              {match.wonDieRoll ? '🎲 Won' : '🎲 Lost'}
-            </Caption>
+            <View style={styles.diceRow}>
+              <MaterialCommunityIcons
+                name="dice-5"
+                size={16}
+                color={match.wonDieRoll ? colors.brand.emerald : colors.brand.coral}
+              />
+              <Caption style={[styles.dieRoll, { color: match.wonDieRoll ? colors.brand.emerald : colors.brand.coral }]}>
+                {match.wonDieRoll ? 'Won' : 'Lost'}
+              </Caption>
+            </View>
           )}
         </View>
       </Card>
@@ -128,7 +136,13 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     fontWeight: '600',
   },
+  diceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   dieRoll: {
-    color: colors.text.muted,
+    marginLeft: 4,
+    fontWeight: '600',
   },
 });

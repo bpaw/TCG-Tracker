@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useEventStore } from '../stores/eventStore';
 import { useMatchStore } from '../stores/matchStore';
@@ -229,9 +230,16 @@ export default function EventDetailScreen() {
                                     </Caption>
                                   )}
                                   {match.wonDieRoll !== undefined && (
-                                    <Caption>
-                                      Die Roll: {match.wonDieRoll ? 'Won' : 'Lost'}
-                                    </Caption>
+                                    <View style={styles.diceRow}>
+                                      <MaterialCommunityIcons
+                                        name="dice-5"
+                                        size={16}
+                                        color={match.wonDieRoll ? colors.brand.emerald : colors.brand.coral}
+                                      />
+                                      <Caption style={[styles.diceText, { color: match.wonDieRoll ? colors.brand.emerald : colors.brand.coral }]}>
+                                        {match.wonDieRoll ? 'Won' : 'Lost'}
+                                      </Caption>
+                                    </View>
                                   )}
                                   {match.started && match.started !== 'UNKNOWN' && (
                                     <Caption>
@@ -279,9 +287,16 @@ export default function EventDetailScreen() {
                               </Caption>
                             )}
                             {match.wonDieRoll !== undefined && (
-                              <Caption>
-                                Die Roll: {match.wonDieRoll ? 'Won' : 'Lost'}
-                              </Caption>
+                              <View style={styles.diceRow}>
+                                <MaterialCommunityIcons
+                                  name="dice-5"
+                                  size={16}
+                                  color={match.wonDieRoll ? colors.brand.emerald : colors.brand.coral}
+                                />
+                                <Caption style={[styles.diceText, { color: match.wonDieRoll ? colors.brand.emerald : colors.brand.coral }]}>
+                                  {match.wonDieRoll ? 'Won' : 'Lost'}
+                                </Caption>
+                              </View>
                             )}
                             {match.started && match.started !== 'UNKNOWN' && (
                               <Caption>
@@ -449,5 +464,13 @@ const styles = StyleSheet.create({
   completedText: {
     color: '#fff',
     fontWeight: '600',
+  },
+  diceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  diceText: {
+    marginLeft: 4,
   },
 });

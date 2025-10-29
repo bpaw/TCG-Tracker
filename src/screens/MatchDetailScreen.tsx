@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useDeckStore } from '../stores/deckStore';
 import { useMatchStore } from '../stores/matchStore';
@@ -143,10 +144,19 @@ export default function MatchDetailScreen() {
           <Card style={styles.section}>
             <H2 style={styles.sectionTitle}>Game Details</H2>
             {match.wonDieRoll !== undefined && (
-              <DetailRow
-                label="Die Roll"
-                value={match.wonDieRoll ? 'Won' : 'Lost'}
-              />
+              <View style={styles.detailRow}>
+                <Body style={styles.detailLabel}>Die Roll</Body>
+                <View style={styles.diceContainer}>
+                  <MaterialCommunityIcons
+                    name="dice-5"
+                    size={24}
+                    color={match.wonDieRoll ? colors.brand.emerald : colors.brand.coral}
+                  />
+                  <Body weight="semibold" style={{ marginLeft: spacing.xs, color: match.wonDieRoll ? colors.brand.emerald : colors.brand.coral }}>
+                    {match.wonDieRoll ? 'Won' : 'Lost'}
+                  </Body>
+                </View>
+              </View>
             )}
             {match.started && match.started !== 'UNKNOWN' && (
               <DetailRow
@@ -265,6 +275,10 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     color: colors.text.secondary,
+  },
+  diceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   notes: {
     lineHeight: 22,
