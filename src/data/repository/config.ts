@@ -2,10 +2,10 @@ import { RepositoryConfig, StorageType } from './interfaces';
 
 /**
  * Global repository configuration
- * Default to AsyncStorage for backwards compatibility
+ * Default to SQLite for better performance and indexed queries
  */
 let currentConfig: RepositoryConfig = {
-  type: 'asyncstorage',
+  type: 'sqlite',
 };
 
 /**

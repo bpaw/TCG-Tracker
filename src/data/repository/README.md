@@ -65,38 +65,38 @@ interface Repository<T> {
 
 ### Storage Types
 
-- **AsyncStorage** (default): Local storage using React Native AsyncStorage
-- **SQLite**: Local SQLite database with indexed queries
+- **SQLite** (default): Local SQLite database with indexed queries
+- **AsyncStorage**: Local storage using React Native AsyncStorage
 - **Cloud**: Future cloud sync implementation (currently stubbed)
 
 ## Usage
 
-### Using Default Storage (AsyncStorage)
+### Using Default Storage (SQLite)
 
-The app uses AsyncStorage by default. No configuration needed:
+The app uses SQLite by default for better performance. No configuration needed:
 
 ```typescript
 import * as EventRepo from '../data/eventRepo';
 
-// This automatically uses AsyncStorage
+// This automatically uses SQLite
 const events = await EventRepo.list();
 ```
 
-### Switching to SQLite
+### Switching to AsyncStorage
 
-To use SQLite instead:
+To use AsyncStorage instead:
 
 ```typescript
 import { setStorageType } from '../data/repository/config';
 import repositoryFactory from '../data/repository/factory';
 
-// Switch to SQLite
-setStorageType('sqlite');
+// Switch to AsyncStorage
+setStorageType('asyncstorage');
 
 // Reset cached repositories to use new implementation
 repositoryFactory.reset();
 
-// Now all repo operations use SQLite
+// Now all repo operations use AsyncStorage
 const events = await EventRepo.list();
 ```
 
@@ -126,23 +126,23 @@ setRepositoryConfig({
 
 ## Implementation Details
 
-### AsyncStorage
-
-- **Pros**: Simple, no setup required, works out of the box
-- **Cons**: No indexing, slower queries on large datasets, no complex filtering
-- **Use case**: Development, small datasets, offline-only apps
-
-### SQLite
+### SQLite (Default)
 
 - **Pros**: Fast queries with indexes, supports complex filtering, relational data
 - **Cons**: Requires expo-sqlite, needs schema migrations
-- **Use case**: Production apps with larger datasets
+- **Use case**: Production apps, recommended for all use cases
 
 Features:
 - Indexed queries on common fields (date, game, etc.)
 - Foreign key constraints
 - Automatic calendar index for date-based lookups
 - Schema versioning with migrations
+
+### AsyncStorage
+
+- **Pros**: Simple, no setup required, works out of the box
+- **Cons**: No indexing, slower queries on large datasets, no complex filtering
+- **Use case**: Development, testing, small datasets, or when SQLite is not available
 
 ### Cloud (Stub)
 
@@ -152,37 +152,58 @@ Features:
 
 ## Seed Data
 
-The seed data script (`src/data/seed.ts`) works with both AsyncStorage and SQLite automatically by using the unified repository interfaces.
+The seed data script (`src/data/seed.ts`) works with both SQLite and AsyncStorage automatically by using the unified repository interfaces.
 
 The APP_META flag (tracks whether seeding has occurred) is stored in AsyncStorage regardless of the main storage type, as it's just a simple flag.
 
 ## Calendar Integration
 
-Both AsyncStorage and SQLite implementations maintain a calendar index for efficient date-based lookups:
+Both SQLite and AsyncStorage implementations maintain a calendar index for efficient date-based lookups:
 
-- **AsyncStorage**: Uses `calendarRepo.ts` with AsyncStorage
 - **SQLite**: Uses dedicated `calendar` table with indexes
+- **AsyncStorage**: Uses `calendarRepo.ts` with AsyncStorage
 
-## Migration Path
+## Data Migration
 
-To migrate from AsyncStorage to SQLite:
+The app uses SQLite by default. If you need to migrate between storage types:
 
-1. Export data from AsyncStorage
-2. Switch storage type to SQLite
+### Manual Migration Process
+
+1. Export data from current storage using repository methods
+2. Switch storage type using `setStorageType()`
 3. Import data using repository methods
 4. Verify data integrity
+
+Example:
+```typescript
+import { setStorageType } from './data/repository/config';
+import repositoryFactory from './data/repository/factory';
+import * as EventRepo from './data/eventRepo';
+
+// Export from current storage
+const events = await EventRepo.list();
+
+// Switch storage type
+setStorageType('asyncstorage');
+repositoryFactory.reset();
+
+// Import to new storage
+for (const event of events) {
+  await EventRepo.create(event);
+}
+```
 
 ## Testing
 
 Test with different storage types:
 
 ```typescript
-// Test AsyncStorage
-setStorageType('asyncstorage');
+// Test SQLite (default)
+setStorageType('sqlite');
 // Run tests...
 
-// Test SQLite
-setStorageType('sqlite');
+// Test AsyncStorage
+setStorageType('asyncstorage');
 // Run tests...
 ```
 
@@ -225,10 +246,12 @@ repositoryFactory.reset();
 
 ## Future Enhancements
 
-- [ ] Data migration utilities (AsyncStorage → SQLite)
+- [x] Data migration utilities (automatic migration from AsyncStorage → SQLite) ✅
 - [ ] Cloud implementation with API integration
 - [ ] Offline sync queue for Cloud
 - [ ] Encryption support for sensitive data
 - [ ] Backup/restore functionality
 - [ ] Query builder for complex filters
 - [ ] Dynamic registry registration at runtime
+- [ ] SQLite to Cloud automatic sync
+- [ ] Migration rollback support
