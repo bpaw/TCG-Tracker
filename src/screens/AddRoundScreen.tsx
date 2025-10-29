@@ -217,13 +217,11 @@ export default function AddRoundScreen() {
                   )}
                   {showDatePicker && Platform.OS === 'ios' && (
                     <Button
-                      variant="primary"
-                      size="md"
+                      title="Done"
+                      intent="primary"
                       onPress={() => setShowDatePicker(false)}
                       style={styles.doneButton}
-                    >
-                      Done
-                    </Button>
+                    />
                   )}
                 </View>
               )}
@@ -455,13 +453,11 @@ export default function AddRoundScreen() {
       {/* Action Button */}
       <View style={styles.footer}>
         <Button
-          variant="primary"
-          size="lg"
+          title={isSubmitting ? 'Saving...' : 'Save Round'}
+          intent="primary"
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
-        >
-          {isSubmitting ? 'Saving...' : 'Save Round'}
-        </Button>
+        />
       </View>
     </KeyboardAvoidingView>
   );

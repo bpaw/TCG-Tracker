@@ -301,9 +301,11 @@ export default function EventDetailScreen() {
               <Body style={styles.emptyText}>
                 No rounds yet. Add your first round to get started!
               </Body>
-              <Button onPress={handleAddRound}>
-                Add Round 1
-              </Button>
+              <Button
+                title="Add Round 1"
+                onPress={handleAddRound}
+                intent="primary"
+              />
             </View>
           )}
 

@@ -144,12 +144,11 @@ export default function EditDeckScreen() {
       {/* Action Button */}
       <View style={styles.footer}>
         <Button
-          variant="primary"
+          title={isSubmitting ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Deck'}
+          intent="primary"
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
-        >
-          {isSubmitting ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Deck'}
-        </Button>
+        />
       </View>
     </KeyboardAvoidingView>
   );
