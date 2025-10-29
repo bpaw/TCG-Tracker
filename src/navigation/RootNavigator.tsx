@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useColorScheme } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useThemeStore } from '../stores/themeStore';
+import { colors } from '../design/tokens';
 
 // Screens
 import DashboardScreen from '../screens/DashboardScreen';
@@ -44,8 +45,12 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: '#8E8E93',
+        tabBarActiveTintColor: colors.brand.violet, // Electric violet
+        tabBarInactiveTintColor: colors.text.muted,
+        tabBarStyle: {
+          backgroundColor: colors.surface[300],
+          borderTopColor: colors.surface[400],
+        },
       }}
     >
       <Tab.Screen
@@ -103,16 +108,17 @@ function MainTabs() {
 }
 
 export default function RootNavigator() {
-  const { isDark } = useThemeStore();
-
   return (
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{
           headerShown: true,
-          headerTintColor: isDark ? '#fff' : '#000',
+          headerTintColor: colors.text.primary,
           headerStyle: {
-            backgroundColor: isDark ? '#000' : '#fff',
+            backgroundColor: colors.surface[100],
+          },
+          headerTitleStyle: {
+            color: colors.text.primary,
           },
         }}
       >

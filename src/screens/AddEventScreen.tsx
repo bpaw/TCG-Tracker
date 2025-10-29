@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -17,15 +16,16 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useEventStore } from '../stores/eventStore';
 import { useUiStore } from '../stores/uiStore';
-import { useThemeStore } from '../stores/themeStore';
 import { FormLabel, FormInput } from '../components/FormControls';
 import { eventSchema, EventFormData, gameTitles } from '../validation/schemas';
+import { colors, spacing } from '../design/tokens';
+import { Body, Caption } from '../components/atoms/Text';
+import { Button } from '../components/atoms/Button';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Add Event'>;
 
 export default function AddEventScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const { isDark } = useThemeStore();
 
   const { createEvent } = useEventStore();
   const { showToast } = useUiStore();
@@ -65,7 +65,7 @@ export default function AddEventScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.container, isDark && styles.containerDark]}
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
@@ -99,21 +99,21 @@ export default function AddEventScreen() {
               control={control}
               name="game"
               render={({ field: { onChange, value } }) => (
-                <View style={[styles.picker, isDark && styles.pickerDark]}>
+                <View style={styles.picker}>
                   <Picker
                     selectedValue={value}
                     onValueChange={onChange}
-                    style={[styles.pickerInput, isDark && styles.pickerInputDark]}
+                    style={styles.pickerInput}
                   >
                     {[...gameTitles].map((game) => (
-                      <Picker.Item key={game} label={game} value={game} color="#000" />
+                      <Picker.Item key={game} label={game} value={game} color={colors.text.primary} />
                     ))}
                   </Picker>
                 </View>
               )}
             />
             {errors.game && (
-              <Text style={styles.errorText}>{errors.game.message}</Text>
+              <Caption style={styles.errorText}>{errors.game.message}</Caption>
             )}
           </View>
 
@@ -126,19 +126,19 @@ export default function AddEventScreen() {
               render={({ field: { onChange, value } }) => (
                 <View>
                   <TouchableOpacity
-                    style={[styles.dateButton, isDark && styles.dateButtonDark]}
+                    style={styles.dateButton}
                     onPress={() => setShowStartPicker(true)}
                   >
-                    <Text style={[styles.dateButtonText, isDark && styles.dateButtonTextDark]}>
+                    <Body style={styles.dateButtonText}>
                       {new Date(value).toLocaleDateString()}
-                    </Text>
+                    </Body>
                   </TouchableOpacity>
                   {showStartPicker && (
                     <DateTimePicker
                       value={new Date(value)}
                       mode="date"
                       display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                      textColor={isDark ? '#fff' : '#000'}
+                      textColor={colors.text.primary}
                       onChange={(event, selectedDate) => {
                         if (Platform.OS === 'android') {
                           setShowStartPicker(false);
@@ -150,18 +150,19 @@ export default function AddEventScreen() {
                     />
                   )}
                   {showStartPicker && Platform.OS === 'ios' && (
-                    <TouchableOpacity
-                      style={styles.doneButton}
-                      onPress={() => setShowStartPicker(false)}
-                    >
-                      <Text style={styles.doneButtonText}>Done</Text>
-                    </TouchableOpacity>
+                    <View style={styles.doneButtonContainer}>
+                      <Button
+                        title="Done"
+                        intent="primary"
+                        onPress={() => setShowStartPicker(false)}
+                      />
+                    </View>
                   )}
                 </View>
               )}
             />
             {errors.startDate && (
-              <Text style={styles.errorText}>{errors.startDate.message}</Text>
+              <Caption style={styles.errorText}>{errors.startDate.message}</Caption>
             )}
           </View>
 
@@ -174,19 +175,19 @@ export default function AddEventScreen() {
               render={({ field: { onChange, value } }) => (
                 <View>
                   <TouchableOpacity
-                    style={[styles.dateButton, isDark && styles.dateButtonDark]}
+                    style={styles.dateButton}
                     onPress={() => setShowEndPicker(true)}
                   >
-                    <Text style={[styles.dateButtonText, isDark && styles.dateButtonTextDark]}>
+                    <Body style={styles.dateButtonText}>
                       {new Date(value).toLocaleDateString()}
-                    </Text>
+                    </Body>
                   </TouchableOpacity>
                   {showEndPicker && (
                     <DateTimePicker
                       value={new Date(value)}
                       mode="date"
                       display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                      textColor={isDark ? '#fff' : '#000'}
+                      textColor={colors.text.primary}
                       minimumDate={new Date(watch('startDate'))}
                       onChange={(event, selectedDate) => {
                         if (Platform.OS === 'android') {
@@ -199,18 +200,19 @@ export default function AddEventScreen() {
                     />
                   )}
                   {showEndPicker && Platform.OS === 'ios' && (
-                    <TouchableOpacity
-                      style={styles.doneButton}
-                      onPress={() => setShowEndPicker(false)}
-                    >
-                      <Text style={styles.doneButtonText}>Done</Text>
-                    </TouchableOpacity>
+                    <View style={styles.doneButtonContainer}>
+                      <Button
+                        title="Done"
+                        intent="primary"
+                        onPress={() => setShowEndPicker(false)}
+                      />
+                    </View>
                   )}
                 </View>
               )}
             />
             {errors.endDate && (
-              <Text style={styles.errorText}>{errors.endDate.message}</Text>
+              <Caption style={styles.errorText}>{errors.endDate.message}</Caption>
             )}
           </View>
 
@@ -239,9 +241,9 @@ export default function AddEventScreen() {
                 />
               )}
             />
-            <Text style={styles.helpText}>
+            <Caption style={styles.helpText}>
               How many rounds will this event have? (1-20)
-            </Text>
+            </Caption>
           </View>
 
           {/* Notes */}
@@ -265,16 +267,14 @@ export default function AddEventScreen() {
       </ScrollView>
 
       {/* Action Button */}
-      <View style={[styles.footer, isDark && styles.footerDark]}>
-        <TouchableOpacity
-          style={[styles.saveButton, isSubmitting && styles.saveButtonDisabled]}
+      <View style={styles.footer}>
+        <Button
+          title={isSubmitting ? 'Creating...' : 'Create Event'}
+          intent="primary"
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
-        >
-          <Text style={styles.saveButtonText}>
-            {isSubmitting ? 'Creating...' : 'Create Event'}
-          </Text>
-        </TouchableOpacity>
+          style={isSubmitting && styles.buttonDisabled}
+        />
       </View>
     </KeyboardAvoidingView>
   );
@@ -283,108 +283,63 @@ export default function AddEventScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  containerDark: {
-    backgroundColor: '#000',
+    backgroundColor: colors.surface[100],
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 20,
+    paddingBottom: spacing.lg,
   },
   form: {
-    padding: 16,
+    padding: spacing.md,
   },
   field: {
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   picker: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface[300],
     borderWidth: 1,
-    borderColor: '#D1D1D6',
+    borderColor: colors.surface[400],
     borderRadius: 8,
     overflow: 'hidden',
   },
-  pickerDark: {
-    backgroundColor: '#1C1C1E',
-    borderColor: '#38383A',
-  },
   pickerInput: {
-    color: '#000',
-  },
-  pickerInputDark: {
-    color: '#fff',
+    color: colors.text.primary,
   },
   errorText: {
-    color: '#FF3B30',
-    fontSize: 12,
+    color: colors.brand.coral,
     marginTop: 4,
   },
   helpText: {
-    color: '#8E8E93',
-    fontSize: 12,
+    color: colors.text.secondary,
     marginTop: 4,
     fontStyle: 'italic',
   },
   footer: {
-    padding: 16,
-    paddingBottom: 32,
+    padding: spacing.md,
+    paddingBottom: spacing['2xl'],
     borderTopWidth: 1,
-    borderTopColor: '#E5E5EA',
-    backgroundColor: '#fff',
+    borderTopColor: colors.surface[400],
+    backgroundColor: colors.surface[100],
   },
-  footerDark: {
-    borderTopColor: '#38383A',
-    backgroundColor: '#000',
-  },
-  saveButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  saveButtonDisabled: {
-    backgroundColor: '#8E8E93',
+  buttonDisabled: {
     opacity: 0.6,
   },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
   dateButton: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface[300],
     borderWidth: 1,
-    borderColor: '#D1D1D6',
+    borderColor: colors.surface[400],
     borderRadius: 8,
-    padding: 12,
+    padding: spacing.sm,
     minHeight: 44,
     justifyContent: 'center',
   },
-  dateButtonDark: {
-    backgroundColor: '#1C1C1E',
-    borderColor: '#38383A',
-  },
   dateButtonText: {
-    fontSize: 16,
-    color: '#000',
+    color: colors.text.primary,
   },
-  dateButtonTextDark: {
-    color: '#fff',
-  },
-  doneButton: {
-    backgroundColor: '#007AFF',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  doneButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+  doneButtonContainer: {
+    marginTop: spacing.xs,
   },
 });

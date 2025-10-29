@@ -8,7 +8,7 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
 } from 'react-native';
-import { useThemeStore } from '../stores/themeStore';
+import { colors, spacing } from '../design/tokens';
 
 interface DropdownOption {
   label: string;
@@ -31,7 +31,6 @@ export default function DropdownButton({
   placeholder = 'Select...',
 }: DropdownButtonProps) {
   const [modalVisible, setModalVisible] = useState(false);
-  const { isDark } = useThemeStore();
 
   const selectedOption = options.find((opt) => opt.value === value);
   const displayText = selectedOption?.label || placeholder;
@@ -43,13 +42,13 @@ export default function DropdownButton({
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.label, isDark && styles.labelDark]}>{label}</Text>
+      <Text style={styles.label}>{label}</Text>
       <TouchableOpacity
-        style={[styles.button, isDark && styles.buttonDark]}
+        style={styles.button}
         onPress={() => setModalVisible(true)}
         activeOpacity={0.7}
       >
-        <Text style={[styles.buttonText, isDark && styles.buttonTextDark]}>
+        <Text style={styles.buttonText}>
           {displayText}
         </Text>
         <Text style={styles.arrow}>▼</Text>
@@ -64,9 +63,9 @@ export default function DropdownButton({
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
           <View style={styles.modalOverlay}>
             <TouchableWithoutFeedback>
-              <View style={[styles.modalContent, isDark && styles.modalContentDark]}>
+              <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>
-                  <Text style={[styles.modalTitle, isDark && styles.modalTitleDark]}>
+                  <Text style={styles.modalTitle}>
                     {label}
                   </Text>
                   <TouchableOpacity onPress={() => setModalVisible(false)}>
@@ -87,7 +86,6 @@ export default function DropdownButton({
                         style={[
                           styles.optionText,
                           option.value === value && styles.optionTextSelected,
-                          isDark && styles.optionTextDark,
                         ]}
                       >
                         {option.label}
@@ -114,77 +112,61 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#8E8E93',
-    marginBottom: 6,
+    color: colors.text.secondary,
+    marginBottom: spacing.xs,
     textTransform: 'uppercase',
-  },
-  labelDark: {
-    color: '#98989F',
   },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface[300],
     borderWidth: 1,
-    borderColor: '#D1D1D6',
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    borderColor: colors.surface[400],
+    borderRadius: spacing.sm,
+    paddingHorizontal: spacing.sm,
     height: 44,
-  },
-  buttonDark: {
-    backgroundColor: '#1C1C1E',
-    borderColor: '#38383A',
   },
   buttonText: {
     fontSize: 16,
-    color: '#000',
+    color: colors.text.primary,
     flex: 1,
-  },
-  buttonTextDark: {
-    color: '#fff',
   },
   arrow: {
     fontSize: 10,
-    color: '#8E8E93',
-    marginLeft: 8,
+    color: colors.text.muted,
+    marginLeft: spacing.sm,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
+    backgroundColor: colors.surface[300],
+    borderRadius: spacing.md,
     width: '80%',
     maxHeight: '70%',
     overflow: 'hidden',
-  },
-  modalContentDark: {
-    backgroundColor: '#1C1C1E',
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    borderBottomColor: colors.surface[400],
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#000',
-  },
-  modalTitleDark: {
-    color: '#fff',
+    color: colors.text.primary,
   },
   closeButton: {
     fontSize: 24,
-    color: '#8E8E93',
-    paddingHorizontal: 8,
+    color: colors.text.muted,
+    paddingHorizontal: spacing.sm,
   },
   optionsList: {
     maxHeight: 400,
@@ -193,29 +175,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    borderBottomColor: colors.surface[400],
   },
   optionSelected: {
-    backgroundColor: '#F0F0F5',
+    backgroundColor: colors.surface[200],
   },
   optionText: {
     fontSize: 16,
-    color: '#000',
+    color: colors.text.primary,
     flex: 1,
   },
   optionTextSelected: {
-    color: '#007AFF',
+    color: colors.brand.violet,
     fontWeight: '600',
-  },
-  optionTextDark: {
-    color: '#fff',
   },
   checkmark: {
     fontSize: 20,
-    color: '#007AFF',
+    color: colors.brand.violet,
     fontWeight: '700',
   },
 });

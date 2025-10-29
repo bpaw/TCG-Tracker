@@ -1,11 +1,9 @@
 import React, { useEffect } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  useColorScheme,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
@@ -19,6 +17,9 @@ import { useDeckStore } from '../stores/deckStore';
 import { useUiStore } from '../stores/uiStore';
 import { FormLabel, FormInput } from '../components/FormControls';
 import { deckSchema, DeckFormData, gameTitles } from '../validation/schemas';
+import { colors, spacing } from '../design/tokens';
+import { Title, Body, Caption } from '../components/atoms/Text';
+import { Button } from '../components/atoms/Button';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Edit Deck'>;
 type EditDeckRouteProp = RouteProp<RootStackParamList, 'Edit Deck'>;
@@ -26,7 +27,6 @@ type EditDeckRouteProp = RouteProp<RootStackParamList, 'Edit Deck'>;
 export default function EditDeckScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<EditDeckRouteProp>();
-  const isDark = false; // Force light mode
 
   const { deckId } = route.params || {};
   const { getDeck, createDeck, updateDeck } = useDeckStore();
@@ -68,7 +68,7 @@ export default function EditDeckScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.container, isDark && styles.containerDark]}
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
@@ -102,22 +102,22 @@ export default function EditDeckScreen() {
               control={control}
               name="game"
               render={({ field: { onChange, value } }) => (
-                <View style={[styles.picker, isDark && styles.pickerDark]}>
+                <View style={styles.picker}>
                   <Picker
                     selectedValue={value}
                     onValueChange={onChange}
-                    style={[styles.pickerInput, isDark && styles.pickerInputDark]}
+                    style={styles.pickerInput}
                     itemStyle={styles.pickerItem}
                   >
                     {[...gameTitles].map((game) => (
-                      <Picker.Item key={game} label={game} value={game} color="#000" />
+                      <Picker.Item key={game} label={game} value={game} color={colors.text.primary} />
                     ))}
                   </Picker>
                 </View>
               )}
             />
             {errors.game && (
-              <Text style={styles.errorText}>{errors.game.message}</Text>
+              <Caption style={styles.errorText}>{errors.game.message}</Caption>
             )}
           </View>
 
@@ -142,16 +142,14 @@ export default function EditDeckScreen() {
       </ScrollView>
 
       {/* Action Button */}
-      <View style={[styles.footer, isDark && styles.footerDark]}>
-        <TouchableOpacity
-          style={[styles.saveButton, isSubmitting && styles.saveButtonDisabled]}
+      <View style={styles.footer}>
+        <Button
+          variant="primary"
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
         >
-          <Text style={styles.saveButtonText}>
-            {isSubmitting ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Deck'}
-          </Text>
-        </TouchableOpacity>
+          {isSubmitting ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Deck'}
+        </Button>
       </View>
     </KeyboardAvoidingView>
   );
@@ -160,74 +158,44 @@ export default function EditDeckScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  containerDark: {
-    backgroundColor: '#000',
+    backgroundColor: colors.surface[100],
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 20,
+    paddingBottom: spacing.lg,
   },
   form: {
-    padding: 16,
+    padding: spacing.md,
   },
   field: {
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   picker: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface[100],
     borderWidth: 1,
-    borderColor: '#D1D1D6',
-    borderRadius: 8,
+    borderColor: colors.surface[300],
+    borderRadius: spacing.sm,
     overflow: 'hidden',
   },
-  pickerDark: {
-    backgroundColor: '#1C1C1E',
-    borderColor: '#38383A',
-  },
   pickerInput: {
-    color: '#000',
-  },
-  pickerInputDark: {
-    color: '#fff',
+    color: colors.text.primary,
   },
   pickerItem: {
-    color: '#000',
+    color: colors.text.primary,
     fontSize: 16,
   },
   errorText: {
-    color: '#FF3B30',
-    fontSize: 12,
-    marginTop: 4,
+    color: colors.brand.coral,
+    marginTop: spacing.xs,
   },
   footer: {
-    padding: 16,
-    paddingBottom: 32,
+    padding: spacing.md,
+    paddingBottom: spacing.xl,
     borderTopWidth: 1,
-    borderTopColor: '#E5E5EA',
-    backgroundColor: '#fff',
-  },
-  footerDark: {
-    borderTopColor: '#38383A',
-    backgroundColor: '#000',
-  },
-  saveButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  saveButtonDisabled: {
-    backgroundColor: '#8E8E93',
-    opacity: 0.6,
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    borderTopColor: colors.surface[300],
+    backgroundColor: colors.surface[100],
   },
 });

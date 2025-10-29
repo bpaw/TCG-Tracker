@@ -3,22 +3,20 @@ import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { format, parseISO } from 'date-fns';
 import { DailyWinRate } from '../utils/stats';
-import { useThemeStore } from '../stores/themeStore';
+import { colors } from '../design/tokens';
 
 interface WinRateChartProps {
   data: DailyWinRate[];
 }
 
 export default function WinRateChart({ data }: WinRateChartProps) {
-  const { isDark } = useThemeStore();
-
   // Filter to only include days with matches for cleaner visualization
   const daysWithMatches = data.filter((d) => d.total > 0);
 
   if (data.length === 0 || daysWithMatches.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <Text style={[styles.emptyText, isDark && styles.emptyTextDark]}>
+        <Text style={styles.emptyText}>
           No matches in the last 30 days
         </Text>
       </View>
@@ -44,7 +42,7 @@ export default function WinRateChart({ data }: WinRateChartProps) {
     datasets: [
       {
         data: sampledData.map((d) => d.winRate),
-        color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`, // Blue color
+        color: (opacity = 1) => `rgba(124, 77, 255, ${opacity})`, // Electric violet
         strokeWidth: 2,
       },
     ],
@@ -58,10 +56,10 @@ export default function WinRateChart({ data }: WinRateChartProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, isDark && styles.titleDark]}>
+      <Text style={styles.title}>
         Win Rate Trend - Last 30 Days
       </Text>
-      <Text style={[styles.subtitle, isDark && styles.subtitleDark]}>
+      <Text style={styles.subtitle}>
         {totalMatches} matches • {overallWinRate}% win rate
       </Text>
       <LineChart
@@ -69,23 +67,23 @@ export default function WinRateChart({ data }: WinRateChartProps) {
         width={screenWidth - 32} // padding
         height={200}
         chartConfig={{
-          backgroundColor: '#fff',
-          backgroundGradientFrom: '#fff',
-          backgroundGradientTo: '#fff',
+          backgroundColor: colors.surface[300],
+          backgroundGradientFrom: colors.surface[300],
+          backgroundGradientTo: colors.surface[200],
           decimalPlaces: 0,
-          color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
-          labelColor: (opacity = 1) => `rgba(142, 142, 147, ${opacity})`,
+          color: (opacity = 1) => `rgba(124, 77, 255, ${opacity})`, // Electric violet
+          labelColor: (opacity = 1) => `rgba(148, 163, 184, ${opacity})`, // grayd-400
           style: {
             borderRadius: 16,
           },
           propsForDots: {
             r: '3',
             strokeWidth: '2',
-            stroke: '#007AFF',
+            stroke: colors.brand.violet,
           },
           propsForBackgroundLines: {
             strokeDasharray: '',
-            stroke: '#E5E5EA',
+            stroke: colors.surface[400],
             strokeWidth: 1,
           },
         }}
@@ -101,14 +99,14 @@ export default function WinRateChart({ data }: WinRateChartProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.surface[300],
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 16,
     marginBottom: 16,
   },
   emptyContainer: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.surface[300],
     borderRadius: 12,
     padding: 24,
     marginHorizontal: 16,
@@ -118,15 +116,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#000',
+    color: colors.text.primary,
     marginBottom: 4,
   },
   titleDark: {
-    color: '#fff',
+    color: colors.text.primary,
   },
   subtitle: {
     fontSize: 12,
-    color: '#8E8E93',
+    color: colors.text.secondary,
     marginBottom: 12,
   },
   chart: {
@@ -134,13 +132,13 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   subtitleDark: {
-    color: '#98989F',
+    color: colors.text.secondary,
   },
   emptyText: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: colors.text.muted,
   },
   emptyTextDark: {
-    color: '#98989F',
+    color: colors.text.muted,
   },
 });

@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -15,9 +14,14 @@ import { useEventStore } from '../stores/eventStore';
 import { useMatchStore } from '../stores/matchStore';
 import { useThemeStore } from '../stores/themeStore';
 import { formatMatchDate } from '../utils/date';
-import KPI from '../components/KPI';
+import { KPI } from '../components/molecules/KPI';
+import { Button } from '../components/atoms/Button';
+import { Card } from '../components/atoms/Card';
+import { Title, H2, Body, Caption } from '../components/atoms/Text';
 import WinRateChart from '../components/WinRateChart';
 import { getOverallRecord, getWinRate, getFirstVsSecondSplit, getDailyWinRates } from '../utils/stats';
+import { styles as designStyles } from '../design/styles';
+import { colors, spacing } from '../design/tokens';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -46,8 +50,8 @@ export default function DashboardScreen() {
 
   if (loading && events.length === 0) {
     return (
-      <View style={[styles.loadingContainer, isDark && styles.loadingContainerDark]}>
-        <ActivityIndicator size="large" color="#007AFF" />
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.brand.violet} />
       </View>
     );
   }
@@ -61,16 +65,17 @@ export default function DashboardScreen() {
   const dailyWinRates = getDailyWinRates(matches, 30);
 
   return (
-    <View style={[styles.container, isDark && styles.containerDark]}>
+    <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>
-            Dashboard
-          </Text>
-          <TouchableOpacity style={styles.newButton} onPress={handleAddEvent}>
-            <Text style={styles.newButtonText}>+ New Event</Text>
-          </TouchableOpacity>
+          <Title>Dashboard</Title>
+          <Button
+            title="+ New Event"
+            intent="primary"
+            onPress={handleAddEvent}
+            style={styles.headerButton}
+          />
         </View>
 
         {/* Stats KPIs */}
@@ -97,7 +102,7 @@ export default function DashboardScreen() {
         {/* Events Section */}
         {hasData && (
           <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>Events</Text>
+            <H2>Events</H2>
           </View>
         )}
 
@@ -114,47 +119,41 @@ export default function DashboardScreen() {
               return (
                 <TouchableOpacity
                   key={event.id}
-                  style={[styles.eventCard, isDark && styles.eventCardDark]}
                   onPress={() => handleEventPress(event.id)}
                 >
-                  <View style={styles.eventHeader}>
-                    <Text style={[styles.eventName, isDark && styles.eventNameDark]}>
-                      {event.name}
-                    </Text>
-                    <Text style={[styles.eventDate, isDark && styles.eventDateDark]}>
-                      {formatMatchDate(event.startDate)}
-                    </Text>
-                  </View>
+                  <Card style={styles.eventCard}>
+                    <View style={styles.eventHeader}>
+                      <Body style={styles.eventName}>{event.name}</Body>
+                      <Caption>{formatMatchDate(event.startDate)}</Caption>
+                    </View>
 
-                  <Text style={[styles.eventGame, isDark && styles.eventGameDark]}>
-                    {event.game}
-                  </Text>
+                    <Caption style={styles.eventGame}>{event.game}</Caption>
 
-                  <View style={styles.eventStats}>
-                    <Text style={[styles.eventStatsText, isDark && styles.eventStatsTextDark]}>
-                      Rounds: {completedRounds}/{event.totalRounds}
-                    </Text>
-                    {eventMatches.length > 0 && (
-                      <Text style={[styles.eventRecord, isDark && styles.eventRecordDark]}>
-                        {wins}-{losses}{ties > 0 ? `-${ties}` : ''}
-                      </Text>
-                    )}
-                  </View>
+                    <View style={styles.eventStats}>
+                      <Caption>Rounds: {completedRounds}/{event.totalRounds}</Caption>
+                      {eventMatches.length > 0 && (
+                        <Body style={styles.eventRecord}>
+                          {wins}-{losses}{ties > 0 ? `-${ties}` : ''}
+                        </Body>
+                      )}
+                    </View>
+                  </Card>
                 </TouchableOpacity>
               );
             })}
           </View>
         ) : (
           <View style={styles.emptyState}>
-            <Text style={[styles.emptyTitle, isDark && styles.emptyTitleDark]}>
-              Welcome to TCG Tracker
-            </Text>
-            <Text style={[styles.emptyText, isDark && styles.emptyTextDark]}>
+            <Title style={styles.emptyTitle}>Welcome to TCG Tracker</Title>
+            <Body style={styles.emptyText}>
               Start by creating an event to track your tournament rounds.
-            </Text>
-            <TouchableOpacity style={styles.emptyButton} onPress={handleAddEvent}>
-              <Text style={styles.emptyButtonText}>Create Your First Event</Text>
-            </TouchableOpacity>
+            </Body>
+            <Button
+              title="Create Your First Event"
+              intent="primary"
+              onPress={handleAddEvent}
+              style={styles.emptyButton}
+            />
           </View>
         )}
       </ScrollView>
@@ -165,19 +164,13 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  containerDark: {
-    backgroundColor: '#000',
+    backgroundColor: colors.surface[100], // Charcoal background
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  loadingContainerDark: {
-    backgroundColor: '#000',
+    backgroundColor: colors.surface[100],
   },
   scrollView: {
     flex: 1,
@@ -186,146 +179,69 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: spacing.md,
     paddingTop: 60,
+    paddingBottom: spacing.md,
   },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#000',
-  },
-  headerTitleDark: {
-    color: '#fff',
-  },
-  newButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  newButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+  headerButton: {
+    paddingHorizontal: spacing.sm,
   },
   kpiContainer: {
     flexDirection: 'row',
-    gap: 12,
-    paddingHorizontal: 16,
-    marginBottom: 12,
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.sm,
   },
   sectionHeader: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingTop: 8,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#000',
-  },
-  sectionTitleDark: {
-    color: '#fff',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    paddingTop: spacing.xs,
   },
   section: {
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.md,
   },
   eventCard: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-  },
-  eventCardDark: {
-    backgroundColor: '#1C1C1E',
+    marginBottom: spacing.sm,
   },
   eventHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 8,
+    marginBottom: spacing.xs,
   },
   eventName: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#000',
     flex: 1,
-    marginRight: 12,
-  },
-  eventNameDark: {
-    color: '#fff',
-  },
-  eventDate: {
-    fontSize: 14,
-    color: '#8E8E93',
-  },
-  eventDateDark: {
-    color: '#98989F',
+    marginRight: spacing.sm,
+    fontWeight: '600',
   },
   eventGame: {
-    fontSize: 14,
-    color: '#007AFF',
-    marginBottom: 8,
-  },
-  eventGameDark: {
-    color: '#0A84FF',
+    color: colors.brand.violet, // Electric violet for game name
+    marginBottom: spacing.xs,
   },
   eventStats: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  eventStatsText: {
-    fontSize: 14,
-    color: '#8E8E93',
-  },
-  eventStatsTextDark: {
-    color: '#98989F',
-  },
   eventRecord: {
-    fontSize: 16,
     fontWeight: '600',
-    color: '#000',
-  },
-  eventRecordDark: {
-    color: '#fff',
   },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 32,
+    paddingHorizontal: spacing['2xl'],
     marginTop: 60,
   },
   emptyTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 12,
+    marginBottom: spacing.sm,
     textAlign: 'center',
-  },
-  emptyTitleDark: {
-    color: '#fff',
   },
   emptyText: {
-    fontSize: 16,
-    color: '#8E8E93',
     textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 22,
-  },
-  emptyTextDark: {
-    color: '#98989F',
+    marginBottom: spacing.xl,
   },
   emptyButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  emptyButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    paddingHorizontal: spacing.xl,
   },
 });

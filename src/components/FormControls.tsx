@@ -5,9 +5,8 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  useColorScheme,
 } from 'react-native';
-import { useThemeStore } from '../stores/themeStore';
+import { colors, spacing } from '../design/tokens';
 
 interface FormLabelProps {
   text: string;
@@ -15,10 +14,8 @@ interface FormLabelProps {
 }
 
 export function FormLabel({ text, required }: FormLabelProps) {
-  const { isDark } = useThemeStore();
-
   return (
-    <Text style={[styles.label, isDark && styles.labelDark]}>
+    <Text style={styles.label}>
       {text}
       {required && <Text style={styles.required}> *</Text>}
     </Text>
@@ -44,21 +41,18 @@ export function FormInput({
   keyboardType = 'default',
   error,
 }: FormInputProps) {
-  const { isDark } = useThemeStore();
-
   return (
     <View>
       <TextInput
         style={[
           styles.input,
-          isDark && styles.inputDark,
           multiline && styles.inputMultiline,
           error && styles.inputError,
         ]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={isDark ? '#98989F' : '#8E8E93'}
+        placeholderTextColor={colors.text.muted}
         multiline={multiline}
         numberOfLines={numberOfLines}
         keyboardType={keyboardType}
@@ -79,26 +73,21 @@ export function SegmentedControl({
   selectedValue,
   onValueChange,
 }: SegmentedControlProps) {
-  const isDark = false; // Force light mode
-
   return (
-    <View style={[styles.segmentedContainer, isDark && styles.segmentedContainerDark]}>
+    <View style={styles.segmentedContainer}>
       {options.map((option) => (
         <TouchableOpacity
           key={option}
           style={[
             styles.segment,
             selectedValue === option && styles.segmentActive,
-            selectedValue === option && isDark && styles.segmentActiveDark,
           ]}
           onPress={() => onValueChange(option)}
         >
           <Text
             style={[
               styles.segmentText,
-              isDark && styles.segmentTextDark,
               selectedValue === option && styles.segmentTextActive,
-              selectedValue === option && isDark && styles.segmentTextActiveDark,
             ]}
           >
             {option}
@@ -122,8 +111,6 @@ export function ChipSelect({
   onValueChange,
   customEnabled = false,
 }: ChipSelectProps) {
-  const isDark = false; // Force light mode
-
   return (
     <View style={styles.chipContainer}>
       {options.map((option) => (
@@ -131,7 +118,6 @@ export function ChipSelect({
           key={option}
           style={[
             styles.chip,
-            isDark && styles.chipDark,
             selectedValue === option && styles.chipActive,
           ]}
           onPress={() => onValueChange(option)}
@@ -139,7 +125,6 @@ export function ChipSelect({
           <Text
             style={[
               styles.chipText,
-              isDark && styles.chipTextDark,
               selectedValue === option && styles.chipTextActive,
             ]}
           >
@@ -155,108 +140,81 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#000',
-    marginBottom: 8,
-  },
-  labelDark: {
-    color: '#fff',
+    color: colors.text.primary,
+    marginBottom: spacing.sm,
   },
   required: {
-    color: '#FF3B30',
+    color: colors.brand.coral,
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface[300],
     borderWidth: 1,
-    borderColor: '#D1D1D6',
-    borderRadius: 8,
-    padding: 12,
+    borderColor: colors.surface[400],
+    borderRadius: spacing.sm,
+    padding: spacing.sm,
     fontSize: 16,
-    color: '#000',
+    color: colors.text.primary,
     minHeight: 44,
-  },
-  inputDark: {
-    backgroundColor: '#1C1C1E',
-    borderColor: '#38383A',
-    color: '#fff',
   },
   inputMultiline: {
     minHeight: 100,
     textAlignVertical: 'top',
   },
   inputError: {
-    borderColor: '#FF3B30',
+    borderColor: colors.brand.coral,
   },
   errorText: {
-    color: '#FF3B30',
+    color: colors.brand.coral,
     fontSize: 12,
-    marginTop: 4,
+    marginTop: spacing.xs,
   },
   segmentedContainer: {
     flexDirection: 'row',
-    backgroundColor: '#E5E5EA',
-    borderRadius: 8,
+    backgroundColor: colors.surface[200],
+    borderRadius: spacing.sm,
     padding: 2,
-  },
-  segmentedContainerDark: {
-    backgroundColor: '#2C2C2E',
   },
   segment: {
     flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm,
     borderRadius: 6,
     alignItems: 'center',
   },
   segmentActive: {
-    backgroundColor: '#fff',
-  },
-  segmentActiveDark: {
-    backgroundColor: '#1C1C1E',
+    backgroundColor: colors.surface[400],
   },
   segmentText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#000',
-  },
-  segmentTextDark: {
-    color: '#fff',
+    color: colors.text.secondary,
   },
   segmentTextActive: {
-    color: '#007AFF',
-  },
-  segmentTextActiveDark: {
-    color: '#0A84FF',
+    color: colors.brand.violet,
   },
   chipContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: spacing.sm,
   },
   chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     borderRadius: 16,
-    backgroundColor: '#E5E5EA',
+    backgroundColor: colors.surface[300],
     borderWidth: 1,
-    borderColor: '#E5E5EA',
-  },
-  chipDark: {
-    backgroundColor: '#2C2C2E',
-    borderColor: '#2C2C2E',
+    borderColor: colors.surface[400],
   },
   chipActive: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: colors.brand.violet,
+    borderColor: colors.brand.violet,
   },
   chipText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#000',
-  },
-  chipTextDark: {
-    color: '#fff',
+    color: colors.text.primary,
   },
   chipTextActive: {
-    color: '#fff',
+    color: colors.text.primary,
   },
 });

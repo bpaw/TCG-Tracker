@@ -1,11 +1,9 @@
 import React, { useEffect } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  useColorScheme,
   Alert,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -14,15 +12,17 @@ import { RootStackParamList } from '../navigation/RootNavigator';
 import { useDeckStore } from '../stores/deckStore';
 import { useMatchStore } from '../stores/matchStore';
 import { useUiStore } from '../stores/uiStore';
-import { useThemeStore } from '../stores/themeStore';
 import { Deck, GameTitle } from '../domain/types';
 import { getWinRate } from '../utils/stats';
+import { colors, spacing } from '../design/tokens';
+import { Title, H2, Body, Caption } from '../components/atoms/Text';
+import { Button } from '../components/atoms/Button';
+import { Card } from '../components/atoms/Card';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function DecksScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const { isDark } = useThemeStore();
 
   const { decks, loadDecks, archiveDeck } = useDeckStore();
   const { matches, loadMatches } = useMatchStore();
@@ -87,101 +87,92 @@ export default function DecksScreen() {
   const games = Object.keys(decksByGame) as GameTitle[];
 
   return (
-    <View style={[styles.container, isDark && styles.containerDark]}>
+    <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>
-            Decks
-          </Text>
-          <TouchableOpacity style={styles.addButton} onPress={handleAddDeck}>
-            <Text style={styles.addButtonText}>+ Add Deck</Text>
-          </TouchableOpacity>
+          <Title>Decks</Title>
+          <Button
+            title="+ Add Deck"
+            onPress={handleAddDeck}
+            intent="primary"
+          />
         </View>
 
         {/* Decks by Game */}
         {games.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={[styles.emptyText, isDark && styles.emptyTextDark]}>
+            <Body style={styles.emptyText}>
               No decks yet. Add your first deck to get started!
-            </Text>
+            </Body>
           </View>
         ) : (
           games.map((game) => (
             <View key={game} style={styles.gameSection}>
-              <Text style={[styles.gameTitle, isDark && styles.gameTitleDark]}>
+              <H2 style={styles.gameTitle}>
                 {game}
-              </Text>
+              </H2>
               {decksByGame[game].map((deck) => {
                 const deckMatches = matches.filter((m) => m.myDeckId === deck.id);
                 const winRate = getWinRate(deckMatches);
 
                 return (
-                  <View
+                  <Card
                     key={deck.id}
                     style={[
                       styles.deckCard,
-                      isDark && styles.deckCardDark,
                       deck.archived && styles.deckCardArchived,
                     ]}
                   >
                     <View style={styles.deckHeader}>
                       <View style={styles.deckInfo}>
-                        <Text
+                        <Body
                           style={[
                             styles.deckTitle,
-                            isDark && styles.deckTitleDark,
                             deck.archived && styles.deckTitleArchived,
                           ]}
                         >
                           {deck.title}
                           {deck.archived && ' (Archived)'}
-                        </Text>
+                        </Body>
                         {deckMatches.length > 0 && (
-                          <Text
-                            style={[styles.deckStats, isDark && styles.deckStatsDark]}
-                          >
+                          <Caption style={styles.deckStats}>
                             {winRate.wins}W-{winRate.total - winRate.wins}L •{' '}
                             {winRate.percentage.toFixed(0)}% WR
-                          </Text>
+                          </Caption>
                         )}
                       </View>
                     </View>
 
                     {deck.notes && (
-                      <Text
-                        style={[styles.deckNotes, isDark && styles.deckNotesDark]}
+                      <Caption
+                        style={styles.deckNotes}
                         numberOfLines={2}
                       >
                         {deck.notes}
-                      </Text>
+                      </Caption>
                     )}
 
                     <View style={styles.deckActions}>
                       {!deck.archived && (
-                        <TouchableOpacity
-                          style={styles.actionButton}
+                        <Button
+                          title="Log Match"
                           onPress={() => handleLogMatch(deck.id)}
-                        >
-                          <Text style={styles.actionButtonText}>Log Match</Text>
-                        </TouchableOpacity>
+                          intent="neutral"
+                        />
                       )}
-                      <TouchableOpacity
-                        style={styles.actionButton}
+                      <Button
+                        title="Edit"
                         onPress={() => handleEditDeck(deck.id)}
-                      >
-                        <Text style={styles.actionButtonText}>Edit</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.actionButton}
+                        intent="neutral"
+                      />
+                      <Button
+                        title={deck.archived ? 'Unarchive' : 'Archive'}
                         onPress={() => handleArchiveDeck(deck)}
-                      >
-                        <Text style={styles.actionButtonText}>
-                          {deck.archived ? 'Unarchive' : 'Archive'}
-                        </Text>
-                      </TouchableOpacity>
+                        intent="neutral"
+                      />
                     </View>
-                  </View>
+                  </Card>
                 );
               })}
             </View>
@@ -195,10 +186,7 @@ export default function DecksScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  containerDark: {
-    backgroundColor: '#000',
+    backgroundColor: colors.surface[100],
   },
   scrollView: {
     flex: 1,
@@ -207,65 +195,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: spacing.md,
     paddingTop: 60,
-  },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#000',
-  },
-  headerTitleDark: {
-    color: '#fff',
-  },
-  addButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  addButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
   },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 32,
+    padding: spacing.xl,
     marginTop: 60,
   },
   emptyText: {
-    fontSize: 16,
-    color: '#8E8E93',
     textAlign: 'center',
   },
-  emptyTextDark: {
-    color: '#98989F',
-  },
   gameSection: {
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   gameTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#000',
-    paddingHorizontal: 16,
-    marginBottom: 12,
-  },
-  gameTitleDark: {
-    color: '#fff',
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.sm,
   },
   deckCard: {
-    backgroundColor: '#f5f5f5',
-    marginHorizontal: 16,
-    marginBottom: 12,
-    padding: 16,
-    borderRadius: 12,
-  },
-  deckCardDark: {
-    backgroundColor: '#1C1C1E',
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.sm,
+    padding: spacing.md,
   },
   deckCardArchived: {
     opacity: 0.6,
@@ -274,51 +227,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 8,
+    marginBottom: spacing.xs,
   },
   deckInfo: {
     flex: 1,
   },
   deckTitle: {
-    fontSize: 18,
     fontWeight: '700',
-    color: '#000',
-    marginBottom: 4,
-  },
-  deckTitleDark: {
-    color: '#fff',
+    marginBottom: spacing.xs,
   },
   deckTitleArchived: {
     fontStyle: 'italic',
   },
   deckStats: {
-    fontSize: 14,
-    color: '#8E8E93',
-  },
-  deckStatsDark: {
-    color: '#98989F',
+    marginTop: spacing.xs,
   },
   deckNotes: {
-    fontSize: 14,
-    color: '#8E8E93',
-    marginBottom: 12,
-  },
-  deckNotesDark: {
-    color: '#98989F',
+    marginBottom: spacing.sm,
   },
   deckActions: {
     flexDirection: 'row',
-    gap: 8,
-  },
-  actionButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-    backgroundColor: '#007AFF',
-  },
-  actionButtonText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
+    gap: spacing.xs,
   },
 });

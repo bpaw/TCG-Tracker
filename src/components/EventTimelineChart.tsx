@@ -2,19 +2,17 @@ import React from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { Match } from '../domain/types';
-import { useThemeStore } from '../stores/themeStore';
+import { colors, spacing } from '../design/tokens';
 
 interface EventTimelineChartProps {
   matches: Match[];
 }
 
 export default function EventTimelineChart({ matches }: EventTimelineChartProps) {
-  const { isDark } = useThemeStore();
-
   if (matches.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <Text style={[styles.emptyText, isDark && styles.emptyTextDark]}>
+        <Text style={styles.emptyText}>
           No rounds completed yet
         </Text>
       </View>
@@ -30,7 +28,7 @@ export default function EventTimelineChart({ matches }: EventTimelineChartProps)
     datasets: [
       {
         data: sortedMatches.map((m) => (m.result === 'LOSS' ? 0 : 1)),
-        color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
+        color: (opacity = 1) => `rgba(124, 77, 255, ${opacity})`, // Electric violet
         strokeWidth: 3,
       },
     ],
@@ -44,10 +42,10 @@ export default function EventTimelineChart({ matches }: EventTimelineChartProps)
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, isDark && styles.titleDark]}>
+      <Text style={styles.title}>
         Round-by-Round Performance
       </Text>
-      <Text style={[styles.subtitle, isDark && styles.subtitleDark]}>
+      <Text style={styles.subtitle}>
         {wins}W-{losses}L{ties > 0 ? `-${ties}T` : ''} • {sortedMatches.length} round{sortedMatches.length !== 1 ? 's' : ''} played
       </Text>
       <LineChart
@@ -55,24 +53,24 @@ export default function EventTimelineChart({ matches }: EventTimelineChartProps)
         width={screenWidth - 32}
         height={180}
         chartConfig={{
-          backgroundColor: '#fff',
-          backgroundGradientFrom: '#fff',
-          backgroundGradientTo: '#fff',
+          backgroundColor: colors.surface[300],
+          backgroundGradientFrom: colors.surface[300],
+          backgroundGradientTo: colors.surface[200],
           decimalPlaces: 0,
-          color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
-          labelColor: (opacity = 1) => `rgba(142, 142, 147, ${opacity})`,
+          color: (opacity = 1) => `rgba(124, 77, 255, ${opacity})`, // Electric violet
+          labelColor: (opacity = 1) => `rgba(148, 163, 184, ${opacity})`, // grayd-400
           style: {
             borderRadius: 16,
           },
           propsForDots: {
             r: '5',
             strokeWidth: '2',
-            stroke: '#007AFF',
-            fill: '#007AFF',
+            stroke: colors.brand.violet,
+            fill: colors.brand.violet,
           },
           propsForBackgroundLines: {
             strokeDasharray: '',
-            stroke: '#E5E5EA',
+            stroke: colors.surface[400],
             strokeWidth: 1,
           },
         }}
@@ -86,14 +84,14 @@ export default function EventTimelineChart({ matches }: EventTimelineChartProps)
       />
       <View style={styles.legend}>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#34C759' }]} />
-          <Text style={[styles.legendText, isDark && styles.legendTextDark]}>
+          <View style={[styles.legendDot, { backgroundColor: colors.brand.emerald }]} />
+          <Text style={styles.legendText}>
             Win (1)
           </Text>
         </View>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#FF3B30' }]} />
-          <Text style={[styles.legendText, isDark && styles.legendTextDark]}>
+          <View style={[styles.legendDot, { backgroundColor: colors.brand.coral }]} />
+          <Text style={styles.legendText}>
             Loss (0)
           </Text>
         </View>
@@ -104,36 +102,30 @@ export default function EventTimelineChart({ matches }: EventTimelineChartProps)
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.surface[300],
     borderRadius: 12,
-    padding: 16,
-    marginHorizontal: 16,
-    marginBottom: 16,
+    padding: spacing.md,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
   },
   emptyContainer: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.surface[300],
     borderRadius: 12,
-    padding: 24,
-    marginHorizontal: 16,
-    marginBottom: 16,
+    padding: spacing.xl,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
     alignItems: 'center',
   },
   title: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#000',
+    color: colors.text.primary,
     marginBottom: 4,
-  },
-  titleDark: {
-    color: '#fff',
   },
   subtitle: {
     fontSize: 12,
-    color: '#8E8E93',
+    color: colors.text.secondary,
     marginBottom: 12,
-  },
-  subtitleDark: {
-    color: '#98989F',
   },
   chart: {
     marginVertical: 8,
@@ -142,13 +134,13 @@ const styles = StyleSheet.create({
   legend: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 24,
+    gap: spacing.xl,
     marginTop: 12,
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: spacing.xs,
   },
   legendDot: {
     width: 12,
@@ -157,16 +149,10 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 12,
-    color: '#8E8E93',
-  },
-  legendTextDark: {
-    color: '#98989F',
+    color: colors.text.secondary,
   },
   emptyText: {
     fontSize: 14,
-    color: '#8E8E93',
-  },
-  emptyTextDark: {
-    color: '#98989F',
+    color: colors.text.muted,
   },
 });

@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   Switch,
@@ -10,6 +9,9 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useThemeStore } from '../stores/themeStore';
+import { Title, H2, Body, Caption } from '../components/atoms/Text';
+import { Card } from '../components/atoms/Card';
+import { colors, spacing } from '../design/tokens';
 
 export default function ProfileScreen() {
   const { isDark, toggleTheme } = useThemeStore();
@@ -41,72 +43,57 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={[styles.container, isDark && styles.containerDark]}>
+    <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
         <View style={styles.header}>
-          <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>
-            Settings
-          </Text>
+          <Title>Settings</Title>
         </View>
 
         {/* Appearance Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
-            Appearance
-          </Text>
-          <View style={[styles.settingRow, isDark && styles.settingRowDark]}>
-            <View style={styles.settingInfo}>
-              <Text style={[styles.settingLabel, isDark && styles.settingLabelDark]}>
-                Dark Mode
-              </Text>
-              <Text style={[styles.settingDescription, isDark && styles.settingDescriptionDark]}>
-                Enable dark theme
-              </Text>
+          <H2 style={styles.sectionTitle}>Appearance</H2>
+          <Card>
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <Body style={styles.settingLabel}>Dark Mode</Body>
+                <Caption>Enable dark theme</Caption>
+              </View>
+              <Switch
+                value={isDark}
+                onValueChange={handleDarkModeToggle}
+                trackColor={{ false: colors.surface[400], true: colors.brand.emerald }}
+                thumbColor="#fff"
+              />
             </View>
-            <Switch
-              value={isDark}
-              onValueChange={handleDarkModeToggle}
-              trackColor={{ false: '#D1D1D6', true: '#34C759' }}
-              thumbColor="#fff"
-            />
-          </View>
+          </Card>
         </View>
 
         {/* Data Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
-            Data
-          </Text>
-          <TouchableOpacity
-            style={[styles.settingRow, isDark && styles.settingRowDark]}
-            onPress={handleClearData}
-          >
-            <View style={styles.settingInfo}>
-              <Text style={[styles.settingLabel, styles.dangerText]}>
-                Clear All Data
-              </Text>
-              <Text style={[styles.settingDescription, isDark && styles.settingDescriptionDark]}>
-                Delete all events, matches, and decks
-              </Text>
-            </View>
+          <H2 style={styles.sectionTitle}>Data</H2>
+          <TouchableOpacity onPress={handleClearData}>
+            <Card>
+              <View style={styles.settingRow}>
+                <View style={styles.settingInfo}>
+                  <Body style={styles.dangerText}>Clear All Data</Body>
+                  <Caption>Delete all events, matches, and decks</Caption>
+                </View>
+              </View>
+            </Card>
           </TouchableOpacity>
         </View>
 
         {/* About Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
-            About
-          </Text>
-          <View style={[styles.settingRow, isDark && styles.settingRowDark]}>
-            <View style={styles.settingInfo}>
-              <Text style={[styles.settingLabel, isDark && styles.settingLabelDark]}>
-                Version
-              </Text>
-              <Text style={[styles.settingDescription, isDark && styles.settingDescriptionDark]}>
-                1.0.0
-              </Text>
+          <H2 style={styles.sectionTitle}>About</H2>
+          <Card>
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <Body style={styles.settingLabel}>Version</Body>
+                <Caption>1.0.0</Caption>
+              </View>
             </View>
-          </View>
+          </Card>
         </View>
       </ScrollView>
     </View>
@@ -116,72 +103,39 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  containerDark: {
-    backgroundColor: '#000',
+    backgroundColor: colors.surface[100],
   },
   scrollView: {
     flex: 1,
   },
   header: {
-    padding: 16,
+    paddingHorizontal: spacing.md,
     paddingTop: 60,
-  },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#000',
-  },
-  headerTitleDark: {
-    color: '#fff',
+    paddingBottom: spacing.md,
   },
   section: {
-    paddingHorizontal: 16,
-    marginBottom: 32,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing['2xl'],
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 12,
-  },
-  sectionTitleDark: {
-    color: '#fff',
+    marginBottom: spacing.sm,
   },
   settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#f5f5f5',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 8,
-  },
-  settingRowDark: {
-    backgroundColor: '#1C1C1E',
   },
   settingInfo: {
     flex: 1,
-    marginRight: 16,
+    marginRight: spacing.md,
   },
   settingLabel: {
-    fontSize: 16,
     fontWeight: '600',
-    color: '#000',
     marginBottom: 4,
   },
-  settingLabelDark: {
-    color: '#fff',
-  },
-  settingDescription: {
-    fontSize: 14,
-    color: '#8E8E93',
-  },
-  settingDescriptionDark: {
-    color: '#98989F',
-  },
   dangerText: {
-    color: '#FF3B30',
+    color: colors.brand.coral,
+    fontWeight: '600',
+    marginBottom: 4,
   },
 });

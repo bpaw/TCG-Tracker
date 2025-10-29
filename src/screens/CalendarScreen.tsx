@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useEventStore } from '../stores/eventStore';
 import { useMatchStore } from '../stores/matchStore';
-import { useThemeStore } from '../stores/themeStore';
 import { getAllCalendarData, getCalendarForDate, rebuildCalendar } from '../data/calendarRepo';
 import * as EventRepo from '../data/eventRepo';
 import * as MatchRepo from '../data/matchRepo';
 import { DateCalendar } from '../domain/types';
+import { colors, spacing } from '../design/tokens';
+import { Title, H2, Body, Caption } from '../components/atoms/Text';
+import { Card } from '../components/atoms/Card';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function CalendarScreen() {
-  const { isDark } = useThemeStore();
   const navigation = useNavigation<NavigationProp>();
   const { events, loadEvents } = useEventStore();
   const { matches, loadMatches } = useMatchStore();
@@ -51,19 +52,19 @@ export default function CalendarScreen() {
       // Both events and matches - show multiple dots
       markedDates[dateKey] = {
         dots: [
-          { color: '#FF9500' }, // Orange for events
-          { color: '#007AFF' }, // Blue for matches
+          { color: colors.brand.amber }, // Amber for events
+          { color: colors.brand.violet }, // Violet for matches
         ],
         marked: true,
       };
     } else if (hasEvents) {
       markedDates[dateKey] = {
-        dots: [{ color: '#FF9500' }], // Orange for events
+        dots: [{ color: colors.brand.amber }], // Amber for events
         marked: true,
       };
     } else if (hasMatches) {
       markedDates[dateKey] = {
-        dots: [{ color: '#007AFF' }], // Blue for matches
+        dots: [{ color: colors.brand.violet }], // Violet for matches
         marked: true,
       };
     }
@@ -75,31 +76,29 @@ export default function CalendarScreen() {
   };
 
   return (
-    <View style={[styles.container, isDark && styles.containerDark]}>
+    <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
         <View style={styles.header}>
-          <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>
-            Calendar
-          </Text>
+          <Title>Calendar</Title>
         </View>
         <Calendar
           markedDates={markedDates}
           onDayPress={handleDayPress}
           markingType={'multi-dot'}
           theme={{
-            backgroundColor: isDark ? '#000' : '#fff',
-            calendarBackground: isDark ? '#000' : '#fff',
-            textSectionTitleColor: isDark ? '#98989F' : '#8E8E93',
-            selectedDayBackgroundColor: '#007AFF',
-            selectedDayTextColor: '#fff',
-            todayTextColor: '#007AFF',
-            dayTextColor: isDark ? '#fff' : '#000',
-            textDisabledColor: isDark ? '#38383A' : '#D1D1D6',
-            dotColor: '#007AFF',
-            selectedDotColor: '#fff',
-            arrowColor: '#007AFF',
-            monthTextColor: isDark ? '#fff' : '#000',
-            indicatorColor: '#007AFF',
+            backgroundColor: colors.surface[100],
+            calendarBackground: colors.surface[100],
+            textSectionTitleColor: colors.text.secondary,
+            selectedDayBackgroundColor: colors.brand.violet,
+            selectedDayTextColor: colors.text.primary,
+            todayTextColor: colors.brand.violet,
+            dayTextColor: colors.text.primary,
+            textDisabledColor: colors.text.muted,
+            dotColor: colors.brand.violet,
+            selectedDotColor: colors.text.primary,
+            arrowColor: colors.brand.violet,
+            monthTextColor: colors.text.primary,
+            indicatorColor: colors.brand.violet,
             textDayFontWeight: '400',
             textMonthFontWeight: '700',
             textDayHeaderFontWeight: '600',
@@ -112,32 +111,26 @@ export default function CalendarScreen() {
 
         <View style={styles.legendContainer}>
           <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: '#FF9500' }]} />
-            <Text style={[styles.legendText, isDark && styles.legendTextDark]}>
-              Events
-            </Text>
+            <View style={[styles.legendDot, { backgroundColor: colors.brand.amber }]} />
+            <Caption>Events</Caption>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: '#007AFF' }]} />
-            <Text style={[styles.legendText, isDark && styles.legendTextDark]}>
-              Rounds
-            </Text>
+            <View style={[styles.legendDot, { backgroundColor: colors.brand.violet }]} />
+            <Caption>Rounds</Caption>
           </View>
         </View>
 
         {/* Selected Date Content */}
         {selectedDateData && (
-          <View style={[styles.selectedDateContainer, isDark && styles.selectedDateContainerDark]}>
-            <Text style={[styles.selectedDateTitle, isDark && styles.selectedDateTitleDark]}>
+          <Card style={styles.selectedDateContainer}>
+            <H2 style={styles.selectedDateTitle}>
               {selectedDateData.date}
-            </Text>
+            </H2>
 
             {/* Events with nested rounds */}
             {selectedDateData.eventIds.length > 0 && (
               <View style={styles.section}>
-                <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
-                  Events
-                </Text>
+                <H2 style={styles.sectionTitle}>Events</H2>
                 {selectedDateData.eventIds.map((eventId) => {
                   const event = events.find(e => e.id === eventId);
                   if (!event) return null;
@@ -150,15 +143,15 @@ export default function CalendarScreen() {
                   return (
                     <View key={eventId} style={styles.eventGroup}>
                       <TouchableOpacity
-                        style={[styles.itemCard, isDark && styles.itemCardDark]}
+                        style={styles.itemCard}
                         onPress={() => navigation.navigate('Event Detail', { eventId })}
                       >
-                        <Text style={[styles.itemTitle, isDark && styles.itemTitleDark]}>
-                          {event.name}
-                        </Text>
-                        <Text style={[styles.itemMeta, isDark && styles.itemMetaDark]}>
-                          {event.game}
-                        </Text>
+                        <Card elevated style={styles.eventCardContent}>
+                          <Body style={styles.itemTitle}>
+                            {event.name}
+                          </Body>
+                          <Caption>{event.game}</Caption>
+                        </Card>
                       </TouchableOpacity>
 
                       {/* Nested rounds */}
@@ -167,18 +160,22 @@ export default function CalendarScreen() {
                           {eventRounds.map((match) => (
                             <TouchableOpacity
                               key={match!.id}
-                              style={[styles.roundCard, isDark && styles.roundCardDark]}
+                              style={styles.roundCard}
                               onPress={() => navigation.navigate('Match Detail', { matchId: match!.id })}
                             >
-                              <Text style={[styles.roundTitle, isDark && styles.roundTitleDark]}>
-                                Round {match!.roundNumber}
-                              </Text>
-                              <Text style={[styles.roundResult, {
-                                color: match!.result === 'WIN' ? '#34C759' :
-                                       match!.result === 'LOSS' ? '#FF3B30' : '#FF9500'
-                              }]}>
-                                {match!.result}
-                              </Text>
+                              <Card style={styles.roundCardBackground}>
+                                <View style={styles.roundCardInner}>
+                                  <Body style={styles.roundTitle}>
+                                    Round {match!.roundNumber}
+                                  </Body>
+                                  <Body style={[styles.roundResult, {
+                                    color: match!.result === 'WIN' ? colors.brand.emerald :
+                                           match!.result === 'LOSS' ? colors.brand.coral : colors.brand.amber
+                                  }]}>
+                                    {match!.result}
+                                  </Body>
+                                </View>
+                              </Card>
                             </TouchableOpacity>
                           ))}
                         </View>
@@ -206,32 +203,34 @@ export default function CalendarScreen() {
 
               return (
                 <View style={styles.section}>
-                  <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
-                    No Events
-                  </Text>
-                  <View style={styles.roundsContainer}>
+                  <H2 style={styles.sectionTitle}>No Events</H2>
+                  <View style={styles.orphanedRoundsContainer}>
                     {orphanedRounds.map((match) => (
                       <TouchableOpacity
                         key={match!.id}
-                        style={[styles.roundCard, isDark && styles.roundCardDark]}
+                        style={styles.roundCard}
                         onPress={() => navigation.navigate('Match Detail', { matchId: match!.id })}
                       >
-                        <Text style={[styles.roundTitle, isDark && styles.roundTitleDark]}>
-                          Round {match!.roundNumber}
-                        </Text>
-                        <Text style={[styles.roundResult, {
-                          color: match!.result === 'WIN' ? '#34C759' :
-                                 match!.result === 'LOSS' ? '#FF3B30' : '#FF9500'
-                        }]}>
-                          {match!.result}
-                        </Text>
+                        <Card style={styles.roundCardBackground}>
+                          <View style={styles.roundCardInner}>
+                            <Body style={styles.roundTitle}>
+                              Round {match!.roundNumber}
+                            </Body>
+                            <Body style={[styles.roundResult, {
+                              color: match!.result === 'WIN' ? colors.brand.emerald :
+                                     match!.result === 'LOSS' ? colors.brand.coral : colors.brand.amber
+                            }]}>
+                              {match!.result}
+                            </Body>
+                          </View>
+                        </Card>
                       </TouchableOpacity>
                     ))}
                   </View>
                 </View>
               );
             })()}
-          </View>
+          </Card>
         )}
       </ScrollView>
     </View>
@@ -241,29 +240,18 @@ export default function CalendarScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  containerDark: {
-    backgroundColor: '#000',
+    backgroundColor: colors.surface[100],
   },
   scrollView: {
     flex: 1,
   },
   header: {
-    padding: 16,
+    padding: spacing.md,
     paddingTop: 60,
   },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#000',
-  },
-  headerTitleDark: {
-    color: '#fff',
-  },
   calendar: {
-    marginHorizontal: 16,
-    marginBottom: 16,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
     borderRadius: 12,
     elevation: 2,
     shadowColor: '#000',
@@ -273,114 +261,74 @@ const styles = StyleSheet.create({
   },
   legendContainer: {
     flexDirection: 'row',
-    padding: 16,
-    marginTop: 8,
-    gap: 16,
+    padding: spacing.md,
+    marginTop: spacing.sm,
+    gap: spacing.md,
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: spacing.sm,
   },
   legendDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
   },
-  legendText: {
-    fontSize: 14,
-    color: '#8E8E93',
-  },
-  legendTextDark: {
-    color: '#98989F',
-  },
   selectedDateContainer: {
-    margin: 16,
-    padding: 16,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-  },
-  selectedDateContainerDark: {
-    backgroundColor: '#1C1C1E',
+    margin: spacing.md,
+    padding: spacing.md,
   },
   selectedDateTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 16,
-  },
-  selectedDateTitleDark: {
-    color: '#fff',
+    marginBottom: spacing.md,
   },
   section: {
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 8,
-  },
-  sectionTitleDark: {
-    color: '#fff',
+    marginBottom: spacing.sm,
   },
   itemCard: {
-    backgroundColor: '#fff',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  itemCardDark: {
-    backgroundColor: '#2C2C2E',
+    marginBottom: spacing.sm,
   },
   itemTitle: {
-    fontSize: 14,
+    marginBottom: spacing.xs,
     fontWeight: '600',
-    color: '#000',
-    marginBottom: 4,
-  },
-  itemTitleDark: {
-    color: '#fff',
-  },
-  itemMeta: {
-    fontSize: 12,
-    color: '#8E8E93',
-  },
-  itemMetaDark: {
-    color: '#98989F',
   },
   eventGroup: {
-    marginBottom: 16,
+    marginBottom: spacing.lg,
+  },
+  eventCardContent: {
+    backgroundColor: colors.surface[400],
   },
   roundsContainer: {
-    marginTop: 8,
-    marginLeft: 16,
-    paddingLeft: 12,
-    borderLeftWidth: 2,
-    borderLeftColor: '#D1D1D6',
+    marginTop: spacing.md,
+    marginLeft: spacing.lg,
+    paddingLeft: spacing.md,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.brand.violet,
   },
   roundCard: {
-    backgroundColor: '#fff',
-    padding: 10,
-    borderRadius: 6,
-    marginBottom: 6,
+    marginBottom: spacing.sm,
+  },
+  roundCardBackground: {
+    backgroundColor: colors.surface[200],
+  },
+  roundCardInner: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  roundCardDark: {
-    backgroundColor: '#2C2C2E',
+    padding: spacing.sm,
   },
   roundTitle: {
-    fontSize: 13,
     fontWeight: '600',
-    color: '#000',
-  },
-  roundTitleDark: {
-    color: '#fff',
   },
   roundResult: {
-    fontSize: 13,
     fontWeight: '700',
+  },
+  orphanedRoundsContainer: {
+    marginLeft: 0,
+    paddingLeft: 0,
+    borderLeftWidth: 0,
   },
 });

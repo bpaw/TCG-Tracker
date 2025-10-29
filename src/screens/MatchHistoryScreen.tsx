@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   FlatList,
   useColorScheme,
@@ -13,9 +12,11 @@ import { RootStackParamList } from '../navigation/RootNavigator';
 import { useDeckStore } from '../stores/deckStore';
 import { useMatchStore } from '../stores/matchStore';
 import { useThemeStore } from '../stores/themeStore';
+import { Title, Body } from '../components/atoms/Text';
 import MatchRow from '../components/MatchRow';
 import DropdownButton from '../components/DropdownButton';
 import { GameTitle, MatchResult } from '../domain/types';
+import { colors, spacing } from '../design/tokens';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -76,12 +77,10 @@ export default function MatchHistoryScreen() {
   ];
 
   return (
-    <View style={[styles.container, isDark && styles.containerDark]}>
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, isDark && styles.headerTitleDark]}>
-          Match History
-        </Text>
+        <Title>Match History</Title>
       </View>
 
       {/* Filters */}
@@ -121,13 +120,11 @@ export default function MatchHistoryScreen() {
       {/* Match List */}
       {loading && matches.length === 0 ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007AFF" />
+          <ActivityIndicator size="large" color={colors.brand.violet} />
         </View>
       ) : matches.length === 0 ? (
         <View style={styles.emptyState}>
-          <Text style={[styles.emptyText, isDark && styles.emptyTextDark]}>
-            No matches found
-          </Text>
+          <Body style={styles.emptyText}>No matches found</Body>
         </View>
       ) : (
         <FlatList
@@ -153,65 +150,27 @@ export default function MatchHistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  containerDark: {
-    backgroundColor: '#000',
+    backgroundColor: colors.surface[100],
   },
   header: {
-    padding: 16,
+    paddingHorizontal: spacing.md,
     paddingTop: 60,
-  },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#000',
-  },
-  headerTitleDark: {
-    color: '#fff',
+    paddingBottom: spacing.md,
   },
   filterContainer: {
-    padding: 16,
+    paddingHorizontal: spacing.md,
     paddingTop: 0,
   },
   filterRow: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 12,
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
   },
   filterItem: {
     flex: 1,
   },
   filterItemLarge: {
     flex: 2,
-  },
-  filterLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#8E8E93',
-    marginBottom: 6,
-    textTransform: 'uppercase',
-  },
-  filterLabelDark: {
-    color: '#98989F',
-  },
-  picker: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#D1D1D6',
-    borderRadius: 8,
-    overflow: 'hidden',
-    height: 44,
-  },
-  pickerDark: {
-    backgroundColor: '#1C1C1E',
-    borderColor: '#38383A',
-  },
-  pickerInput: {
-    color: '#000',
-  },
-  pickerInputDark: {
-    color: '#fff',
   },
   loadingContainer: {
     flex: 1,
@@ -222,16 +181,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 32,
+    paddingHorizontal: spacing['2xl'],
   },
   emptyText: {
-    fontSize: 16,
-    color: '#8E8E93',
-  },
-  emptyTextDark: {
-    color: '#98989F',
+    color: colors.text.muted,
   },
   listContent: {
-    paddingBottom: 16,
+    paddingBottom: spacing.md,
   },
 });

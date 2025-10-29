@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -18,7 +17,6 @@ import { useDeckStore } from '../stores/deckStore';
 import { useMatchStore } from '../stores/matchStore';
 import { useEventStore } from '../stores/eventStore';
 import { useUiStore } from '../stores/uiStore';
-import { useThemeStore } from '../stores/themeStore';
 import {
   FormLabel,
   FormInput,
@@ -35,6 +33,9 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import { onePieceColors } from '../domain/gameTitle/onePiece';
 import leaders from '../data/_data/leaders.json';
+import { colors, spacing } from '../design/tokens';
+import { Title, Body, Caption } from '../components/atoms/Text';
+import { Button } from '../components/atoms/Button';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Add Round'>;
 type AddRoundRouteProp = RouteProp<RootStackParamList, 'Add Round'>;
@@ -42,7 +43,6 @@ type AddRoundRouteProp = RouteProp<RootStackParamList, 'Add Round'>;
 export default function AddRoundScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<AddRoundRouteProp>();
-  const { isDark } = useThemeStore();
 
   const { eventId, roundNumber } = route.params;
   const { decks, loadDecks } = useDeckStore();
@@ -124,17 +124,15 @@ export default function AddRoundScreen() {
 
   if (!event) {
     return (
-      <View style={[styles.container, isDark && styles.containerDark]}>
-        <Text style={[styles.errorText, isDark && styles.errorTextDark]}>
-          Event not found
-        </Text>
+      <View style={styles.container}>
+        <Body style={styles.errorText}>Event not found</Body>
       </View>
     );
   }
 
   return (
     <KeyboardAvoidingView
-      style={[styles.container, isDark && styles.containerDark]}
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
@@ -146,12 +144,12 @@ export default function AddRoundScreen() {
         <View style={styles.form}>
           {/* Event & Round Info */}
           <View style={styles.infoCard}>
-            <Text style={[styles.infoLabel, isDark && styles.infoLabelDark]}>
+            <Body weight="semibold" style={styles.infoLabel}>
               {event.name}
-            </Text>
-            <Text style={[styles.infoValue, isDark && styles.infoValueDark]}>
+            </Body>
+            <Title size="lg" style={styles.infoValue}>
               Round {roundNumber} of {event.totalRounds}
-            </Text>
+            </Title>
           </View>
 
           {/* My Deck */}
@@ -161,11 +159,11 @@ export default function AddRoundScreen() {
               control={control}
               name="myDeckId"
               render={({ field: { onChange, value } }) => (
-                <View style={[styles.picker, isDark && styles.pickerDark]}>
+                <View style={styles.picker}>
                   <Picker
                     selectedValue={value}
                     onValueChange={onChange}
-                    style={[styles.pickerInput, isDark && styles.pickerInputDark]}
+                    style={styles.pickerInput}
                   >
                     <Picker.Item label="Select a deck..." value="" color="#000" />
                     {activeDecks.map((deck) => (
@@ -181,7 +179,7 @@ export default function AddRoundScreen() {
               )}
             />
             {errors.myDeckId && (
-              <Text style={styles.errorText}>{errors.myDeckId.message}</Text>
+              <Caption style={styles.errorText}>{errors.myDeckId.message}</Caption>
             )}
           </View>
 
@@ -194,19 +192,17 @@ export default function AddRoundScreen() {
               render={({ field: { onChange, value } }) => (
                 <View>
                   <TouchableOpacity
-                    style={[styles.dateButton, isDark && styles.dateButtonDark]}
+                    style={styles.dateButton}
                     onPress={() => setShowDatePicker(true)}
                   >
-                    <Text style={[styles.dateButtonText, isDark && styles.dateButtonTextDark]}>
-                      {new Date(value).toLocaleDateString()}
-                    </Text>
+                    <Body>{new Date(value).toLocaleDateString()}</Body>
                   </TouchableOpacity>
                   {showDatePicker && event && (
                     <DateTimePicker
                       value={new Date(value)}
                       mode="date"
                       display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                      textColor={isDark ? '#fff' : '#000'}
+                      textColor="#fff"
                       minimumDate={new Date(event.startDate)}
                       maximumDate={new Date(event.endDate)}
                       onChange={(pickerEvent, selectedDate) => {
@@ -220,18 +216,20 @@ export default function AddRoundScreen() {
                     />
                   )}
                   {showDatePicker && Platform.OS === 'ios' && (
-                    <TouchableOpacity
-                      style={styles.doneButton}
+                    <Button
+                      variant="primary"
+                      size="md"
                       onPress={() => setShowDatePicker(false)}
+                      style={styles.doneButton}
                     >
-                      <Text style={styles.doneButtonText}>Done</Text>
-                    </TouchableOpacity>
+                      Done
+                    </Button>
                   )}
                 </View>
               )}
             />
             {errors.date && (
-              <Text style={styles.errorText}>{errors.date.message}</Text>
+              <Caption style={styles.errorText}>{errors.date.message}</Caption>
             )}
           </View>
 
@@ -244,11 +242,11 @@ export default function AddRoundScreen() {
                   control={control}
                   name="onePieceLeader"
                   render={({ field: { onChange, value } }) => (
-                    <View style={[styles.picker, isDark && styles.pickerDark, styles.onePiecePicker]}>
+                    <View style={[styles.picker, styles.onePiecePicker]}>
                       <Picker
                         selectedValue={value || ''}
                         onValueChange={onChange}
-                        style={[styles.pickerInput, isDark && styles.pickerInputDark]}
+                        style={styles.pickerInput}
                       >
                         <Picker.Item label="Select leader..." value="" color="#000" />
                         {leaders.map((leader) => (
@@ -267,11 +265,11 @@ export default function AddRoundScreen() {
                   control={control}
                   name="onePieceColor"
                   render={({ field: { onChange, value } }) => (
-                    <View style={[styles.picker, isDark && styles.pickerDark]}>
+                    <View style={styles.picker}>
                       <Picker
                         selectedValue={value || ''}
                         onValueChange={onChange}
-                        style={[styles.pickerInput, isDark && styles.pickerInputDark]}
+                        style={styles.pickerInput}
                       >
                         <Picker.Item label="Select color..." value="" color="#000" />
                         {onePieceColors.map((color) => (
@@ -334,7 +332,7 @@ export default function AddRoundScreen() {
               )}
             />
             {errors.result && (
-              <Text style={styles.errorText}>{errors.result.message}</Text>
+              <Caption style={styles.errorText}>{errors.result.message}</Caption>
             )}
           </View>
 
@@ -369,14 +367,15 @@ export default function AddRoundScreen() {
                     ]}
                     onPress={() => onChange(true)}
                   >
-                    <Text
+                    <Body
+                      weight="semibold"
                       style={[
                         styles.booleanButtonText,
                         value === true && styles.booleanButtonTextActive,
                       ]}
                     >
                       Yes
-                    </Text>
+                    </Body>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
@@ -385,14 +384,15 @@ export default function AddRoundScreen() {
                     ]}
                     onPress={() => onChange(false)}
                   >
-                    <Text
+                    <Body
+                      weight="semibold"
                       style={[
                         styles.booleanButtonText,
                         value === false && styles.booleanButtonTextActive,
                       ]}
                     >
                       No
-                    </Text>
+                    </Body>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
@@ -401,14 +401,15 @@ export default function AddRoundScreen() {
                     ]}
                     onPress={() => onChange(undefined)}
                   >
-                    <Text
+                    <Body
+                      weight="semibold"
                       style={[
                         styles.booleanButtonText,
                         value === undefined && styles.booleanButtonTextActive,
                       ]}
                     >
                       Unknown
-                    </Text>
+                    </Body>
                   </TouchableOpacity>
                 </View>
               )}
@@ -452,16 +453,15 @@ export default function AddRoundScreen() {
       </ScrollView>
 
       {/* Action Button */}
-      <View style={[styles.footer, isDark && styles.footerDark]}>
-        <TouchableOpacity
-          style={[styles.saveButton, isSubmitting && styles.saveButtonDisabled]}
+      <View style={styles.footer}>
+        <Button
+          variant="primary"
+          size="lg"
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
         >
-          <Text style={styles.saveButtonText}>
-            {isSubmitting ? 'Saving...' : 'Save Round'}
-          </Text>
-        </TouchableOpacity>
+          {isSubmitting ? 'Saving...' : 'Save Round'}
+        </Button>
       </View>
     </KeyboardAvoidingView>
   );
@@ -470,154 +470,89 @@ export default function AddRoundScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  containerDark: {
-    backgroundColor: '#000',
+    backgroundColor: colors.surface[100],
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 20,
+    paddingBottom: spacing.lg,
   },
   form: {
-    padding: 16,
+    padding: spacing.md,
   },
   field: {
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   infoCard: {
-    backgroundColor: '#E3F2FD',
-    padding: 16,
+    backgroundColor: colors.surface[300],
+    padding: spacing.md,
     borderRadius: 8,
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   infoLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1976D2',
+    color: colors.brand.violet,
     marginBottom: 4,
   },
-  infoLabelDark: {
-    color: '#64B5F6',
-  },
   infoValue: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#0D47A1',
-  },
-  infoValueDark: {
-    color: '#90CAF9',
+    color: colors.text.primary,
   },
   picker: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface[300],
     borderWidth: 1,
-    borderColor: '#D1D1D6',
+    borderColor: colors.surface[400],
     borderRadius: 8,
     overflow: 'hidden',
   },
-  pickerDark: {
-    backgroundColor: '#1C1C1E',
-    borderColor: '#38383A',
-  },
   pickerInput: {
-    color: '#000',
-  },
-  pickerInputDark: {
-    color: '#fff',
+    color: colors.text.primary,
   },
   onePiecePicker: {
-    marginBottom: 12,
+    marginBottom: spacing.sm,
   },
   errorText: {
-    color: '#FF3B30',
-    fontSize: 12,
+    color: colors.brand.coral,
     marginTop: 4,
-  },
-  errorTextDark: {
-    color: '#FF6B6B',
   },
   booleanButtons: {
     flexDirection: 'row',
-    gap: 8,
+    gap: spacing.xs,
   },
   booleanButton: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
     borderRadius: 8,
-    backgroundColor: '#E5E5EA',
+    backgroundColor: colors.surface[300],
     alignItems: 'center',
   },
   booleanButtonActive: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.brand.violet,
   },
   booleanButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#000',
+    color: colors.text.secondary,
   },
   booleanButtonTextActive: {
-    color: '#fff',
+    color: colors.text.primary,
   },
   footer: {
-    padding: 16,
-    paddingBottom: 32,
+    padding: spacing.md,
+    paddingBottom: spacing['2xl'],
     borderTopWidth: 1,
-    borderTopColor: '#E5E5EA',
-    backgroundColor: '#fff',
-  },
-  footerDark: {
-    borderTopColor: '#38383A',
-    backgroundColor: '#000',
-  },
-  saveButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  saveButtonDisabled: {
-    backgroundColor: '#8E8E93',
-    opacity: 0.6,
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    borderTopColor: colors.surface[300],
+    backgroundColor: colors.surface[100],
   },
   dateButton: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface[300],
     borderWidth: 1,
-    borderColor: '#D1D1D6',
+    borderColor: colors.surface[400],
     borderRadius: 8,
-    padding: 12,
+    padding: spacing.sm,
     minHeight: 44,
     justifyContent: 'center',
   },
-  dateButtonDark: {
-    backgroundColor: '#1C1C1E',
-    borderColor: '#38383A',
-  },
-  dateButtonText: {
-    fontSize: 16,
-    color: '#000',
-  },
-  dateButtonTextDark: {
-    color: '#fff',
-  },
   doneButton: {
-    backgroundColor: '#007AFF',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  doneButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    marginTop: spacing.xs,
   },
 });
