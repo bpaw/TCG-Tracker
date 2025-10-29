@@ -44,12 +44,6 @@ export default function DecksScreen() {
     navigation.navigate('Edit Deck', { deckId });
   };
 
-  const handleLogMatch = (deckId: string) => {
-    // Note: With event-first structure, users should create events first
-    // then add rounds from the event detail page
-    showToast('Create an event first, then add rounds', 'info');
-  };
-
   const handleArchiveDeck = (deck: Deck) => {
     const action = deck.archived ? 'Unarchive' : 'Archive';
     Alert.alert(
@@ -154,13 +148,6 @@ export default function DecksScreen() {
                     )}
 
                     <View style={styles.deckActions}>
-                      {!deck.archived && (
-                        <Button
-                          title="Log Match"
-                          onPress={() => handleLogMatch(deck.id)}
-                          intent="neutral"
-                        />
-                      )}
                       <Button
                         title="Edit"
                         onPress={() => handleEditDeck(deck.id)}
