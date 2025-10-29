@@ -1,60 +1,63 @@
-import * as Crypto from 'expo-crypto';
+/**
+ * Deck Repository - Unified interface for deck storage
+ *
+ * This module provides a consistent API for deck operations regardless of the
+ * underlying storage implementation (AsyncStorage, SQLite, or Cloud).
+ */
+
 import { Deck } from '../domain/types';
-import { getItem, setItem, STORAGE_KEYS } from './asyncStorage';
+import repositoryFactory, { DeckFilters } from './repository/factory';
 
-// TODO: migrate to SQLite later for better querying and performance
-// Keep these function signatures stable for easy migration
+// Re-export DeckFilters for backwards compatibility
+export type { DeckFilters };
 
-export async function list(): Promise<Deck[]> {
-  const decks = await getItem<Deck[]>(STORAGE_KEYS.DECKS);
-  return decks || [];
+/**
+ * Get the active deck repository implementation
+ */
+function getRepo() {
+  return repositoryFactory.getDeckRepository();
 }
 
+/**
+ * List all decks with optional filters
+ */
+export async function list(filters?: DeckFilters): Promise<Deck[]> {
+  return getRepo().list(filters);
+}
+
+/**
+ * Get a single deck by ID
+ */
 export async function get(id: string): Promise<Deck | null> {
-  const decks = await list();
-  return decks.find((deck) => deck.id === id) || null;
+  return getRepo().get(id);
 }
 
+/**
+ * Create a new deck
+ */
 export async function create(
   data: Omit<Deck, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<Deck> {
-  const decks = await list();
-  const now = new Date().toISOString();
-
-  const newDeck: Deck = {
-    ...data,
-    id: Crypto.randomUUID(),
-    createdAt: now,
-    updatedAt: now,
-  };
-
-  decks.push(newDeck);
-  await setItem(STORAGE_KEYS.DECKS, decks);
-
-  return newDeck;
+  return getRepo().create(data);
 }
 
+/**
+ * Update an existing deck
+ */
 export async function update(id: string, data: Partial<Deck>): Promise<Deck | null> {
-  const decks = await list();
-  const index = decks.findIndex((deck) => deck.id === id);
-
-  if (index === -1) {
-    return null;
-  }
-
-  const updatedDeck: Deck = {
-    ...decks[index],
-    ...data,
-    id, // ensure id cannot be changed
-    updatedAt: new Date().toISOString(),
-  };
-
-  decks[index] = updatedDeck;
-  await setItem(STORAGE_KEYS.DECKS, decks);
-
-  return updatedDeck;
+  return getRepo().update(id, data);
 }
 
+/**
+ * Archive/unarchive a deck
+ */
 export async function archive(id: string, archived = true): Promise<Deck | null> {
   return update(id, { archived });
+}
+
+/**
+ * Remove a deck
+ */
+export async function remove(id: string): Promise<boolean> {
+  return getRepo().remove(id);
 }

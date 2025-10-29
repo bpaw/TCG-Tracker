@@ -1,120 +1,56 @@
-import * as Crypto from 'expo-crypto';
-import { Match, GameTitle, MatchResult } from '../domain/types';
-import { getItem, setItem, STORAGE_KEYS } from './asyncStorage';
-import * as CalendarRepo from './calendarRepo';
+/**
+ * Match Repository - Unified interface for match storage
+ *
+ * This module provides a consistent API for match operations regardless of the
+ * underlying storage implementation (AsyncStorage, SQLite, or Cloud).
+ */
 
-// TODO: migrate to SQLite later for better querying and performance
-// Keep these function signatures stable for easy migration
+import { Match } from '../domain/types';
+import repositoryFactory, { MatchFilters } from './repository/factory';
 
-export interface MatchFilters {
-  game?: GameTitle;
-  deckId?: string;
-  dateFrom?: string; // ISO date string
-  dateTo?: string;   // ISO date string
-  result?: MatchResult;
+// Re-export MatchFilters for backwards compatibility
+export type { MatchFilters };
+
+/**
+ * Get the active match repository implementation
+ */
+function getRepo() {
+  return repositoryFactory.getMatchRepository();
 }
 
+/**
+ * List all matches with optional filters
+ */
 export async function list(filters?: MatchFilters): Promise<Match[]> {
-  const matches = await getItem<Match[]>(STORAGE_KEYS.MATCHES);
-  let result = matches || [];
-
-  if (filters) {
-    if (filters.game) {
-      result = result.filter((match) => match.game === filters.game);
-    }
-    if (filters.deckId) {
-      result = result.filter((match) => match.myDeckId === filters.deckId);
-    }
-    if (filters.result) {
-      result = result.filter((match) => match.result === filters.result);
-    }
-    if (filters.dateFrom) {
-      result = result.filter((match) => match.date >= filters.dateFrom!);
-    }
-    if (filters.dateTo) {
-      result = result.filter((match) => match.date <= filters.dateTo!);
-    }
-  }
-
-  // Sort by date descending (newest first)
-  result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-  return result;
+  return getRepo().list(filters);
 }
 
+/**
+ * Get a single match by ID
+ */
 export async function get(id: string): Promise<Match | null> {
-  const matches = await getItem<Match[]>(STORAGE_KEYS.MATCHES);
-  return matches?.find((match) => match.id === id) || null;
+  return getRepo().get(id);
 }
 
+/**
+ * Create a new match
+ */
 export async function create(
   data: Omit<Match, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<Match> {
-  const matches = await list();
-  const now = new Date().toISOString();
-
-  const newMatch: Match = {
-    ...data,
-    id: Crypto.randomUUID(),
-    createdAt: now,
-    updatedAt: now,
-  };
-
-  matches.push(newMatch);
-  await setItem(STORAGE_KEYS.MATCHES, matches);
-
-  // Dual write to calendar
-  await CalendarRepo.addMatchToCalendar(newMatch.id, newMatch.date);
-
-  return newMatch;
+  return getRepo().create(data);
 }
 
+/**
+ * Update an existing match
+ */
 export async function update(id: string, data: Partial<Match>): Promise<Match | null> {
-  const matches = await getItem<Match[]>(STORAGE_KEYS.MATCHES);
-  if (!matches) return null;
-
-  const index = matches.findIndex((match) => match.id === id);
-  if (index === -1) {
-    return null;
-  }
-
-  const oldMatch = matches[index];
-
-  const updatedMatch: Match = {
-    ...oldMatch,
-    ...data,
-    id, // ensure id cannot be changed
-    updatedAt: new Date().toISOString(),
-  };
-
-  matches[index] = updatedMatch;
-  await setItem(STORAGE_KEYS.MATCHES, matches);
-
-  // Update calendar if date changed
-  if (oldMatch.date !== updatedMatch.date) {
-    await CalendarRepo.removeMatchFromCalendar(id, oldMatch.date);
-    await CalendarRepo.addMatchToCalendar(id, updatedMatch.date);
-  }
-
-  return updatedMatch;
+  return getRepo().update(id, data);
 }
 
+/**
+ * Remove a match
+ */
 export async function remove(id: string): Promise<boolean> {
-  const matches = await getItem<Match[]>(STORAGE_KEYS.MATCHES);
-  if (!matches) return false;
-
-  const index = matches.findIndex((match) => match.id === id);
-  if (index === -1) {
-    return false;
-  }
-
-  const matchToRemove = matches[index];
-
-  matches.splice(index, 1);
-  await setItem(STORAGE_KEYS.MATCHES, matches);
-
-  // Remove from calendar
-  await CalendarRepo.removeMatchFromCalendar(id, matchToRemove.date);
-
-  return true;
+  return getRepo().remove(id);
 }
