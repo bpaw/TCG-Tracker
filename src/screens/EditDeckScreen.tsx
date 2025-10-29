@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -17,7 +17,7 @@ import { useDeckStore } from '../stores/deckStore';
 import { useUiStore } from '../stores/uiStore';
 import { FormLabel, FormInput } from '../components/FormControls';
 import { deckSchema, DeckFormData, gameTitles } from '../validation/schemas';
-import { colors, spacing } from '../design/tokens';
+import { useTheme } from '../hooks/useTheme';
 import { Title, Body, Caption } from '../components/atoms/Text';
 import { Button } from '../components/atoms/Button';
 
@@ -25,6 +25,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Edit Deck'>
 type EditDeckRouteProp = RouteProp<RootStackParamList, 'Edit Deck'>;
 
 export default function EditDeckScreen() {
+  const { colors, spacing } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<EditDeckRouteProp>();
 
@@ -34,6 +35,51 @@ export default function EditDeckScreen() {
 
   const isEditing = !!deckId;
   const existingDeck = isEditing ? getDeck(deckId) : null;
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface[100],
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingBottom: spacing.lg,
+    },
+    form: {
+      padding: spacing.md,
+    },
+    field: {
+      marginBottom: spacing.lg,
+    },
+    picker: {
+      backgroundColor: colors.surface[100],
+      borderWidth: 1,
+      borderColor: colors.surface[300],
+      borderRadius: spacing.sm,
+      overflow: 'hidden',
+    },
+    pickerInput: {
+      color: colors.text.primary,
+    },
+    pickerItem: {
+      color: colors.text.primary,
+      fontSize: 16,
+    },
+    errorText: {
+      color: colors.brand.coral,
+      marginTop: spacing.xs,
+    },
+    footer: {
+      padding: spacing.md,
+      paddingBottom: spacing.xl,
+      borderTopWidth: 1,
+      borderTopColor: colors.surface[300],
+      backgroundColor: colors.surface[100],
+    },
+  }), [colors, spacing]);
 
   const {
     control,
@@ -153,48 +199,3 @@ export default function EditDeckScreen() {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface[100],
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: spacing.lg,
-  },
-  form: {
-    padding: spacing.md,
-  },
-  field: {
-    marginBottom: spacing.lg,
-  },
-  picker: {
-    backgroundColor: colors.surface[100],
-    borderWidth: 1,
-    borderColor: colors.surface[300],
-    borderRadius: spacing.sm,
-    overflow: 'hidden',
-  },
-  pickerInput: {
-    color: colors.text.primary,
-  },
-  pickerItem: {
-    color: colors.text.primary,
-    fontSize: 16,
-  },
-  errorText: {
-    color: colors.brand.coral,
-    marginTop: spacing.xs,
-  },
-  footer: {
-    padding: spacing.md,
-    paddingBottom: spacing.xl,
-    borderTopWidth: 1,
-    borderTopColor: colors.surface[300],
-    backgroundColor: colors.surface[100],
-  },
-});

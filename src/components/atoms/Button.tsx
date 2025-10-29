@@ -2,10 +2,11 @@
  * Button Component (Atom)
  * Primary UI button with intent variants
  * Ensures ≥44dp touch targets for accessibility
+ * Theme-aware for light/dark mode support
  */
 
 import { Pressable, Text, PressableProps } from 'react-native';
-import { styles as designStyles } from '../../design/styles';
+import { useTheme } from '../../hooks/useTheme';
 
 type ButtonIntent = 'primary' | 'neutral' | 'success' | 'danger';
 
@@ -20,24 +21,28 @@ export function Button({
   style,
   ...rest
 }: ButtonProps) {
+  const { styles } = useTheme();
+
   const intentStyles = {
-    primary: designStyles.btnPrimary,
-    neutral: designStyles.btnNeutral,
-    success: designStyles.btnSuccess,
-    danger: designStyles.btnDanger,
+    primary: styles.btnPrimary,
+    neutral: styles.btnNeutral,
+    success: styles.btnSuccess,
+    danger: styles.btnDanger,
   };
+
+  const textStyle = intent === 'neutral' ? styles.btnTextNeutral : styles.btnText;
 
   return (
     <Pressable
       style={({ pressed }) => [
-        designStyles.btnBase,
+        styles.btnBase,
         intentStyles[intent],
         { opacity: pressed ? 0.9 : 1 },
         style,
       ]}
       {...rest}
     >
-      <Text style={designStyles.btnText}>{title}</Text>
+      <Text style={textStyle}>{title}</Text>
     </Pressable>
   );
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,7 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
-import { colors, spacing } from '../design/tokens';
+import { useTheme } from '../hooks/useTheme';
 
 interface FormLabelProps {
   text: string;
@@ -14,6 +14,20 @@ interface FormLabelProps {
 }
 
 export function FormLabel({ text, required }: FormLabelProps) {
+  const { colors, spacing } = useTheme();
+
+  const styles = useMemo(() => StyleSheet.create({
+    label: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text.primary,
+      marginBottom: spacing.sm,
+    },
+    required: {
+      color: colors.brand.coral,
+    },
+  }), [colors, spacing]);
+
   return (
     <Text style={styles.label}>
       {text}
@@ -41,6 +55,33 @@ export function FormInput({
   keyboardType = 'default',
   error,
 }: FormInputProps) {
+  const { colors, spacing } = useTheme();
+
+  const styles = useMemo(() => StyleSheet.create({
+    input: {
+      backgroundColor: colors.surface[300],
+      borderWidth: 1,
+      borderColor: colors.surface[400],
+      borderRadius: spacing.sm,
+      padding: spacing.sm,
+      fontSize: 16,
+      color: colors.text.primary,
+      minHeight: 44,
+    },
+    inputMultiline: {
+      minHeight: 100,
+      textAlignVertical: 'top',
+    },
+    inputError: {
+      borderColor: colors.brand.coral,
+    },
+    errorText: {
+      color: colors.brand.coral,
+      fontSize: 12,
+      marginTop: spacing.xs,
+    },
+  }), [colors, spacing]);
+
   return (
     <View>
       <TextInput
@@ -73,6 +114,35 @@ export function SegmentedControl({
   selectedValue,
   onValueChange,
 }: SegmentedControlProps) {
+  const { colors, spacing } = useTheme();
+
+  const styles = useMemo(() => StyleSheet.create({
+    segmentedContainer: {
+      flexDirection: 'row',
+      backgroundColor: colors.surface[200],
+      borderRadius: spacing.sm,
+      padding: 2,
+    },
+    segment: {
+      flex: 1,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.sm,
+      borderRadius: 6,
+      alignItems: 'center',
+    },
+    segmentActive: {
+      backgroundColor: colors.surface[400],
+    },
+    segmentText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text.secondary,
+    },
+    segmentTextActive: {
+      color: colors.brand.violet,
+    },
+  }), [colors, spacing]);
+
   return (
     <View style={styles.segmentedContainer}>
       {options.map((option) => (
@@ -111,6 +181,36 @@ export function ChipSelect({
   onValueChange,
   customEnabled = false,
 }: ChipSelectProps) {
+  const { colors, spacing } = useTheme();
+
+  const styles = useMemo(() => StyleSheet.create({
+    chipContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    chip: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      borderRadius: 16,
+      backgroundColor: colors.surface[300],
+      borderWidth: 1,
+      borderColor: colors.surface[400],
+    },
+    chipActive: {
+      backgroundColor: colors.brand.violet,
+      borderColor: colors.brand.violet,
+    },
+    chipText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text.primary,
+    },
+    chipTextActive: {
+      color: colors.text.primary,
+    },
+  }), [colors, spacing]);
+
   return (
     <View style={styles.chipContainer}>
       {options.map((option) => (
@@ -135,86 +235,3 @@ export function ChipSelect({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-  },
-  required: {
-    color: colors.brand.coral,
-  },
-  input: {
-    backgroundColor: colors.surface[300],
-    borderWidth: 1,
-    borderColor: colors.surface[400],
-    borderRadius: spacing.sm,
-    padding: spacing.sm,
-    fontSize: 16,
-    color: colors.text.primary,
-    minHeight: 44,
-  },
-  inputMultiline: {
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
-  inputError: {
-    borderColor: colors.brand.coral,
-  },
-  errorText: {
-    color: colors.brand.coral,
-    fontSize: 12,
-    marginTop: spacing.xs,
-  },
-  segmentedContainer: {
-    flexDirection: 'row',
-    backgroundColor: colors.surface[200],
-    borderRadius: spacing.sm,
-    padding: 2,
-  },
-  segment: {
-    flex: 1,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    borderRadius: 6,
-    alignItems: 'center',
-  },
-  segmentActive: {
-    backgroundColor: colors.surface[400],
-  },
-  segmentText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text.secondary,
-  },
-  segmentTextActive: {
-    color: colors.brand.violet,
-  },
-  chipContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  chip: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: 16,
-    backgroundColor: colors.surface[300],
-    borderWidth: 1,
-    borderColor: colors.surface[400],
-  },
-  chipActive: {
-    backgroundColor: colors.brand.violet,
-    borderColor: colors.brand.violet,
-  },
-  chipText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text.primary,
-  },
-  chipTextActive: {
-    color: colors.text.primary,
-  },
-});

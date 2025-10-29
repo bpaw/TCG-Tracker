@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -7,7 +7,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Match } from '../domain/types';
 import { formatMatchDate } from '../utils/date';
-import { colors, spacing } from '../design/tokens';
+import { useTheme } from '../hooks/useTheme';
 import { Body, Caption } from './atoms/Text';
 import { Card } from './atoms/Card';
 
@@ -18,6 +18,77 @@ interface MatchRowProps {
 }
 
 export default function MatchRow({ match, deckTitle, onPress }: MatchRowProps) {
+  const { colors, spacing } = useTheme();
+
+  const styles = useMemo(() => StyleSheet.create({
+    touchable: {
+      marginHorizontal: spacing.md,
+      marginBottom: spacing.sm,
+    },
+    container: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: spacing.md,
+    },
+    leftSection: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    resultBadge: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      borderRadius: 4,
+      marginRight: spacing.sm,
+      minWidth: 50,
+      alignItems: 'center',
+    },
+    resultText: {
+      color: colors.surface[100],
+      fontWeight: '700',
+    },
+    info: {
+      flex: 1,
+    },
+    date: {
+      color: colors.text.muted,
+      marginBottom: 2,
+    },
+    matchup: {
+      fontWeight: '600',
+      color: colors.text.primary,
+      marginBottom: 2,
+    },
+    score: {
+      color: colors.text.muted,
+    },
+    rightSection: {
+      alignItems: 'flex-end',
+      marginLeft: spacing.sm,
+    },
+    badge: {
+      backgroundColor: colors.brand.violet,
+      paddingHorizontal: spacing.xs,
+      paddingVertical: 2,
+      borderRadius: 4,
+      marginBottom: spacing.xs,
+    },
+    badgeText: {
+      color: colors.text.primary,
+      fontWeight: '600',
+    },
+    diceRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    dieRoll: {
+      marginLeft: 4,
+      fontWeight: '600',
+    },
+  }), [colors, spacing]);
+
   const resultColor =
     match.result === 'WIN'
       ? colors.brand.emerald
@@ -77,72 +148,3 @@ export default function MatchRow({ match, deckTitle, onPress }: MatchRowProps) {
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  touchable: {
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: spacing.md,
-  },
-  leftSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  resultBadge: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: 4,
-    marginRight: spacing.sm,
-    minWidth: 50,
-    alignItems: 'center',
-  },
-  resultText: {
-    color: colors.surface[100],
-    fontWeight: '700',
-  },
-  info: {
-    flex: 1,
-  },
-  date: {
-    color: colors.text.muted,
-    marginBottom: 2,
-  },
-  matchup: {
-    fontWeight: '600',
-    color: colors.text.primary,
-    marginBottom: 2,
-  },
-  score: {
-    color: colors.text.muted,
-  },
-  rightSection: {
-    alignItems: 'flex-end',
-    marginLeft: spacing.sm,
-  },
-  badge: {
-    backgroundColor: colors.brand.violet,
-    paddingHorizontal: spacing.xs,
-    paddingVertical: 2,
-    borderRadius: 4,
-    marginBottom: spacing.xs,
-  },
-  badgeText: {
-    color: colors.text.primary,
-    fontWeight: '600',
-  },
-  diceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  dieRoll: {
-    marginLeft: 4,
-    fontWeight: '600',
-  },
-});

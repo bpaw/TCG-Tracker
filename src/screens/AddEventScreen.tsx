@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -18,13 +18,14 @@ import { useEventStore } from '../stores/eventStore';
 import { useUiStore } from '../stores/uiStore';
 import { FormLabel, FormInput } from '../components/FormControls';
 import { eventSchema, EventFormData, gameTitles } from '../validation/schemas';
-import { colors, spacing } from '../design/tokens';
+import { useTheme } from '../hooks/useTheme';
 import { Body, Caption } from '../components/atoms/Text';
 import { Button } from '../components/atoms/Button';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Add Event'>;
 
 export default function AddEventScreen() {
+  const { colors, spacing } = useTheme();
   const navigation = useNavigation<NavigationProp>();
 
   const { createEvent } = useEventStore();
@@ -32,6 +33,70 @@ export default function AddEventScreen() {
 
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface[100],
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingBottom: spacing.lg,
+    },
+    form: {
+      padding: spacing.md,
+    },
+    field: {
+      marginBottom: spacing.lg,
+    },
+    picker: {
+      backgroundColor: colors.surface[300],
+      borderWidth: 1,
+      borderColor: colors.surface[400],
+      borderRadius: 8,
+      overflow: 'hidden',
+    },
+    pickerInput: {
+      color: colors.text.primary,
+    },
+    errorText: {
+      color: colors.brand.coral,
+      marginTop: 4,
+    },
+    helpText: {
+      color: colors.text.secondary,
+      marginTop: 4,
+      fontStyle: 'italic',
+    },
+    footer: {
+      padding: spacing.md,
+      paddingBottom: spacing['2xl'],
+      borderTopWidth: 1,
+      borderTopColor: colors.surface[400],
+      backgroundColor: colors.surface[100],
+    },
+    buttonDisabled: {
+      opacity: 0.6,
+    },
+    dateButton: {
+      backgroundColor: colors.surface[300],
+      borderWidth: 1,
+      borderColor: colors.surface[400],
+      borderRadius: 8,
+      padding: spacing.sm,
+      minHeight: 44,
+      justifyContent: 'center',
+    },
+    dateButtonText: {
+      color: colors.text.primary,
+    },
+    doneButtonContainer: {
+      marginTop: spacing.xs,
+    },
+  }), [colors, spacing]);
 
   const {
     control,
@@ -279,67 +344,3 @@ export default function AddEventScreen() {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface[100],
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: spacing.lg,
-  },
-  form: {
-    padding: spacing.md,
-  },
-  field: {
-    marginBottom: spacing.lg,
-  },
-  picker: {
-    backgroundColor: colors.surface[300],
-    borderWidth: 1,
-    borderColor: colors.surface[400],
-    borderRadius: 8,
-    overflow: 'hidden',
-  },
-  pickerInput: {
-    color: colors.text.primary,
-  },
-  errorText: {
-    color: colors.brand.coral,
-    marginTop: 4,
-  },
-  helpText: {
-    color: colors.text.secondary,
-    marginTop: 4,
-    fontStyle: 'italic',
-  },
-  footer: {
-    padding: spacing.md,
-    paddingBottom: spacing['2xl'],
-    borderTopWidth: 1,
-    borderTopColor: colors.surface[400],
-    backgroundColor: colors.surface[100],
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  dateButton: {
-    backgroundColor: colors.surface[300],
-    borderWidth: 1,
-    borderColor: colors.surface[400],
-    borderRadius: 8,
-    padding: spacing.sm,
-    minHeight: 44,
-    justifyContent: 'center',
-  },
-  dateButtonText: {
-    color: colors.text.primary,
-  },
-  doneButtonContainer: {
-    marginTop: spacing.xs,
-  },
-});

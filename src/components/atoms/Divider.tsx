@@ -1,11 +1,13 @@
 /**
  * Divider Component (Atom)
  * Horizontal rule for visual separation
+ * Theme-aware for light/dark mode support
  */
 
 import { View, ViewProps } from 'react-native';
-import { styles as designStyles } from '../../design/styles';
+import { useTheme } from '../../hooks/useTheme';
 
 export function Divider({ style, ...props }: ViewProps) {
-  return <View style={[designStyles.divider, style]} {...props} />;
+  const { styles } = useTheme();
+  return <View style={[styles.divider, style]} {...props} />;
 }

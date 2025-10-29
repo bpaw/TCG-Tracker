@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Calendar, DateData } from 'react-native-calendars';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -10,18 +10,117 @@ import { getAllCalendarData, getCalendarForDate, rebuildCalendar } from '../data
 import * as EventRepo from '../data/eventRepo';
 import * as MatchRepo from '../data/matchRepo';
 import { DateCalendar } from '../domain/types';
-import { colors, spacing } from '../design/tokens';
+import { useTheme } from '../hooks/useTheme';
 import { Title, H2, Body, Caption } from '../components/atoms/Text';
 import { Card } from '../components/atoms/Card';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function CalendarScreen() {
+  const { colors, spacing } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const { events, loadEvents } = useEventStore();
   const { matches, loadMatches } = useMatchStore();
   const [calendarData, setCalendarData] = useState<Record<string, DateCalendar>>({});
   const [selectedDateData, setSelectedDateData] = useState<DateCalendar | null>(null);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface[100],
+    },
+    scrollView: {
+      flex: 1,
+    },
+    header: {
+      padding: spacing.md,
+      paddingTop: 60,
+    },
+    calendar: {
+      marginHorizontal: spacing.md,
+      marginBottom: spacing.md,
+      borderRadius: 12,
+      elevation: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+    },
+    legendContainer: {
+      flexDirection: 'row',
+      padding: spacing.md,
+      marginTop: spacing.sm,
+      gap: spacing.md,
+    },
+    legendItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    legendDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+    },
+    selectedDateContainer: {
+      margin: spacing.md,
+      padding: spacing.md,
+    },
+    selectedDateTitle: {
+      marginBottom: spacing.md,
+    },
+    section: {
+      marginBottom: spacing.md,
+    },
+    sectionTitle: {
+      marginBottom: spacing.sm,
+    },
+    itemCard: {
+      marginBottom: spacing.sm,
+    },
+    itemTitle: {
+      marginBottom: spacing.xs,
+      fontWeight: '600',
+    },
+    eventGroup: {
+      marginBottom: spacing.lg,
+    },
+    eventCardContent: {
+      backgroundColor: colors.surface[400],
+      borderLeftWidth: 3,
+      borderLeftColor: colors.brand.amber,
+    },
+    roundsContainer: {
+      marginTop: spacing.md,
+      marginLeft: spacing.lg,
+      paddingLeft: spacing.md,
+      borderLeftWidth: 3,
+      borderLeftColor: colors.brand.violet,
+    },
+    roundCard: {
+      marginBottom: spacing.sm,
+    },
+    roundCardBackground: {
+      backgroundColor: colors.surface[200],
+    },
+    roundCardInner: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: spacing.sm,
+    },
+    roundTitle: {
+      fontWeight: '600',
+    },
+    roundResult: {
+      fontWeight: '700',
+    },
+    orphanedRoundsContainer: {
+      marginLeft: 0,
+      paddingLeft: 0,
+      borderLeftWidth: 0,
+    },
+  }), [colors, spacing]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -236,101 +335,3 @@ export default function CalendarScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface[100],
-  },
-  scrollView: {
-    flex: 1,
-  },
-  header: {
-    padding: spacing.md,
-    paddingTop: 60,
-  },
-  calendar: {
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.md,
-    borderRadius: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  legendContainer: {
-    flexDirection: 'row',
-    padding: spacing.md,
-    marginTop: spacing.sm,
-    gap: spacing.md,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  legendDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  selectedDateContainer: {
-    margin: spacing.md,
-    padding: spacing.md,
-  },
-  selectedDateTitle: {
-    marginBottom: spacing.md,
-  },
-  section: {
-    marginBottom: spacing.md,
-  },
-  sectionTitle: {
-    marginBottom: spacing.sm,
-  },
-  itemCard: {
-    marginBottom: spacing.sm,
-  },
-  itemTitle: {
-    marginBottom: spacing.xs,
-    fontWeight: '600',
-  },
-  eventGroup: {
-    marginBottom: spacing.lg,
-  },
-  eventCardContent: {
-    backgroundColor: colors.surface[400],
-    borderLeftWidth: 3,
-    borderLeftColor: colors.brand.amber,
-  },
-  roundsContainer: {
-    marginTop: spacing.md,
-    marginLeft: spacing.lg,
-    paddingLeft: spacing.md,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.brand.violet,
-  },
-  roundCard: {
-    marginBottom: spacing.sm,
-  },
-  roundCardBackground: {
-    backgroundColor: colors.surface[200],
-  },
-  roundCardInner: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: spacing.sm,
-  },
-  roundTitle: {
-    fontWeight: '600',
-  },
-  roundResult: {
-    fontWeight: '700',
-  },
-  orphanedRoundsContainer: {
-    marginLeft: 0,
-    paddingLeft: 0,
-    borderLeftWidth: 0,
-  },
-});

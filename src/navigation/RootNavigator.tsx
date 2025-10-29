@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useColorScheme } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useThemeStore } from '../stores/themeStore';
-import { colors } from '../design/tokens';
+import { useTheme } from '../hooks/useTheme';
 
 // Screens
 import DashboardScreen from '../screens/DashboardScreen';
@@ -41,18 +41,20 @@ const Tab = createBottomTabNavigator<RootTabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function MainTabs() {
+  const { colors } = useTheme();
+
+  const screenOptions = useMemo(() => ({
+    headerShown: false,
+    tabBarActiveTintColor: colors.brand.violet, // Electric violet
+    tabBarInactiveTintColor: colors.text.muted,
+    tabBarStyle: {
+      backgroundColor: colors.surface[300],
+      borderTopColor: colors.surface[400],
+    },
+  }), [colors]);
+
   return (
-    <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: colors.brand.violet, // Electric violet
-        tabBarInactiveTintColor: colors.text.muted,
-        tabBarStyle: {
-          backgroundColor: colors.surface[300],
-          borderTopColor: colors.surface[400],
-        },
-      }}
-    >
+    <Tab.Navigator screenOptions={screenOptions}>
       <Tab.Screen
         name="Dashboard"
         component={DashboardScreen}
@@ -108,20 +110,22 @@ function MainTabs() {
 }
 
 export default function RootNavigator() {
+  const { colors } = useTheme();
+
+  const screenOptions = useMemo(() => ({
+    headerShown: true,
+    headerTintColor: colors.text.primary,
+    headerStyle: {
+      backgroundColor: colors.surface[100],
+    },
+    headerTitleStyle: {
+      color: colors.text.primary,
+    },
+  }), [colors]);
+
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: true,
-          headerTintColor: colors.text.primary,
-          headerStyle: {
-            backgroundColor: colors.surface[100],
-          },
-          headerTitleStyle: {
-            color: colors.text.primary,
-          },
-        }}
-      >
+      <Stack.Navigator screenOptions={screenOptions}>
         <Stack.Screen
           name="Main"
           component={MainTabs}

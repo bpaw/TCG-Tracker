@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -16,7 +16,7 @@ import { useMatchStore } from '../stores/matchStore';
 import { useUiStore } from '../stores/uiStore';
 import { formatDateTime } from '../utils/date';
 import { getLeaderImage, getColorBorderColor } from '../domain/gameTitle/onePieceAssets';
-import { colors, spacing } from '../design/tokens';
+import { useTheme } from '../hooks/useTheme';
 import { Title, H2, Body, Caption } from '../components/atoms/Text';
 import { Card } from '../components/atoms/Card';
 import { Chip } from '../components/atoms/Chip';
@@ -25,6 +25,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Match Detai
 type MatchDetailRouteProp = RouteProp<RootStackParamList, 'Match Detail'>;
 
 export default function MatchDetailScreen() {
+  const { colors, spacing } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<MatchDetailRouteProp>();
 
@@ -35,6 +36,106 @@ export default function MatchDetailScreen() {
 
   const match = getMatch(matchId);
   const deck = match ? decks.find((d) => d.id === match.myDeckId) : null;
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface[100],
+    },
+    scrollView: {
+      flex: 1,
+    },
+    header: {
+      alignItems: 'center',
+      padding: spacing.xl,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.surface[400],
+    },
+    score: {
+      marginTop: spacing.md,
+    },
+    section: {
+      margin: spacing.md,
+    },
+    sectionTitle: {
+      marginBottom: spacing.md,
+    },
+    detailRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingVertical: spacing.sm,
+    },
+    detailLabel: {
+      color: colors.text.secondary,
+    },
+    diceContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    notes: {
+      lineHeight: 22,
+    },
+    tags: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    errorText: {
+      color: colors.brand.coral,
+      textAlign: 'center',
+      marginTop: spacing['2xl'],
+    },
+    footer: {
+      flexDirection: 'row',
+      gap: spacing.md,
+      padding: spacing.md,
+      borderTopWidth: 1,
+      borderTopColor: colors.surface[400],
+      backgroundColor: colors.surface[100],
+    },
+    duplicateButton: {
+      flex: 1,
+      backgroundColor: colors.brand.violet,
+      paddingVertical: spacing.md,
+      borderRadius: spacing.sm,
+      alignItems: 'center',
+    },
+    duplicateButtonText: {
+      color: '#FFFFFF',
+    },
+    deleteButton: {
+      flex: 1,
+      backgroundColor: colors.brand.coral,
+      paddingVertical: spacing.md,
+      borderRadius: spacing.sm,
+      alignItems: 'center',
+    },
+    deleteButtonText: {
+      color: '#FFFFFF',
+    },
+    onePieceLeaderSection: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+    },
+    leaderImageBorder: {
+      borderWidth: 4,
+      borderRadius: spacing.md,
+      padding: spacing.xs,
+      overflow: 'hidden',
+    },
+    leaderImageLarge: {
+      width: 120,
+      height: 120,
+      borderRadius: spacing.md,
+    },
+    leaderInfo: {
+      flex: 1,
+    },
+    leaderName: {
+      marginBottom: spacing.xs,
+    },
+  }), [colors, spacing]);
 
   useEffect(() => {
     loadDecks();
@@ -228,6 +329,19 @@ interface DetailRowProps {
 }
 
 function DetailRow({ label, value, small = false }: DetailRowProps) {
+  const { colors, spacing } = useTheme();
+
+  const styles = useMemo(() => StyleSheet.create({
+    detailRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingVertical: spacing.sm,
+    },
+    detailLabel: {
+      color: colors.text.secondary,
+    },
+  }), [colors, spacing]);
+
   return (
     <View style={styles.detailRow}>
       {small ? (
@@ -244,103 +358,3 @@ function DetailRow({ label, value, small = false }: DetailRowProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface[100],
-  },
-  scrollView: {
-    flex: 1,
-  },
-  header: {
-    alignItems: 'center',
-    padding: spacing.xl,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.surface[400],
-  },
-  score: {
-    marginTop: spacing.md,
-  },
-  section: {
-    margin: spacing.md,
-  },
-  sectionTitle: {
-    marginBottom: spacing.md,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.sm,
-  },
-  detailLabel: {
-    color: colors.text.secondary,
-  },
-  diceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  notes: {
-    lineHeight: 22,
-  },
-  tags: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  errorText: {
-    color: colors.brand.coral,
-    textAlign: 'center',
-    marginTop: spacing['2xl'],
-  },
-  footer: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    padding: spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.surface[400],
-    backgroundColor: colors.surface[100],
-  },
-  duplicateButton: {
-    flex: 1,
-    backgroundColor: colors.brand.violet,
-    paddingVertical: spacing.md,
-    borderRadius: spacing.sm,
-    alignItems: 'center',
-  },
-  duplicateButtonText: {
-    color: '#FFFFFF',
-  },
-  deleteButton: {
-    flex: 1,
-    backgroundColor: colors.brand.coral,
-    paddingVertical: spacing.md,
-    borderRadius: spacing.sm,
-    alignItems: 'center',
-  },
-  deleteButtonText: {
-    color: '#FFFFFF',
-  },
-  onePieceLeaderSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  leaderImageBorder: {
-    borderWidth: 4,
-    borderRadius: spacing.md,
-    padding: spacing.xs,
-    overflow: 'hidden',
-  },
-  leaderImageLarge: {
-    width: 120,
-    height: 120,
-    borderRadius: spacing.md,
-  },
-  leaderInfo: {
-    flex: 1,
-  },
-  leaderName: {
-    marginBottom: spacing.xs,
-  },
-});

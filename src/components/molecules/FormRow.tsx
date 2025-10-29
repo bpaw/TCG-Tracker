@@ -4,9 +4,9 @@
  * Supports error states and helper text
  */
 
-import { View, ViewProps, StyleSheet } from 'react-native';
+import { View, ViewProps } from 'react-native';
 import { Body, Caption } from '../atoms/Text';
-import { colors, spacing } from '../../design/tokens';
+import { useTheme } from '../../hooks/useTheme';
 
 interface FormRowProps extends ViewProps {
   label: string;
@@ -15,26 +15,6 @@ interface FormRowProps extends ViewProps {
   required?: boolean;
   children: React.ReactNode;
 }
-
-const formRowStyles = StyleSheet.create({
-  container: {
-    marginBottom: spacing.md,
-  },
-  label: {
-    marginBottom: spacing.sm / 2,
-  },
-  required: {
-    color: colors.brand.coral,
-  },
-  error: {
-    color: colors.brand.coral,
-    marginTop: 4,
-  },
-  helperText: {
-    color: colors.text.muted,
-    marginTop: 4,
-  },
-});
 
 export function FormRow({
   label,
@@ -45,17 +25,18 @@ export function FormRow({
   style,
   ...rest
 }: FormRowProps) {
+  const { colors, spacing } = useTheme();
   return (
-    <View style={[formRowStyles.container, style]} {...rest}>
-      <Body style={formRowStyles.label}>
+    <View style={[{ marginBottom: spacing.md }, style]} {...rest}>
+      <Body style={{ marginBottom: spacing.sm / 2 }}>
         {label}
-        {required && <Caption style={formRowStyles.required}> *</Caption>}
+        {required && <Caption style={{ color: colors.brand.coral }}> *</Caption>}
       </Body>
 
       {children}
 
-      {error && <Caption style={formRowStyles.error}>{error}</Caption>}
-      {!error && helperText && <Caption style={formRowStyles.helperText}>{helperText}</Caption>}
+      {error && <Caption style={{ color: colors.brand.coral, marginTop: 4 }}>{error}</Caption>}
+      {!error && helperText && <Caption style={{ color: colors.text.muted, marginTop: 4 }}>{helperText}</Caption>}
     </View>
   );
 }

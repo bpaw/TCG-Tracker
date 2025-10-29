@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -20,17 +20,102 @@ import { Card } from '../components/atoms/Card';
 import { Title, H2, Body, Caption } from '../components/atoms/Text';
 import WinRateChart from '../components/WinRateChart';
 import { getOverallRecord, getWinRate, getFirstVsSecondSplit, getDailyWinRates } from '../utils/stats';
-import { styles as designStyles } from '../design/styles';
-import { colors, spacing } from '../design/tokens';
+import { useTheme } from '../hooks/useTheme';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function DashboardScreen() {
+  const { colors, spacing } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const { isDark } = useThemeStore();
 
   const { events, loadEvents, loading } = useEventStore();
   const { matches, loadMatches } = useMatchStore();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface[100], // Charcoal background
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.surface[100],
+    },
+    scrollView: {
+      flex: 1,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: spacing.md,
+      paddingTop: 60,
+      paddingBottom: spacing.md,
+    },
+    headerButton: {
+      paddingHorizontal: spacing.sm,
+    },
+    kpiContainer: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+      paddingHorizontal: spacing.md,
+      marginBottom: spacing.sm,
+    },
+    sectionHeader: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      paddingTop: spacing.xs,
+    },
+    section: {
+      paddingHorizontal: spacing.md,
+    },
+    eventCard: {
+      marginBottom: spacing.sm,
+    },
+    eventHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: spacing.xs,
+    },
+    eventName: {
+      flex: 1,
+      marginRight: spacing.sm,
+      fontWeight: '600',
+    },
+    eventGame: {
+      color: colors.brand.violet, // Electric violet for game name
+      marginBottom: spacing.xs,
+    },
+    eventStats: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    eventRecord: {
+      fontWeight: '600',
+    },
+    emptyState: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: spacing['2xl'],
+      marginTop: 60,
+    },
+    emptyTitle: {
+      marginBottom: spacing.sm,
+      textAlign: 'center',
+    },
+    emptyText: {
+      textAlign: 'center',
+      marginBottom: spacing.xl,
+    },
+    emptyButton: {
+      paddingHorizontal: spacing.xl,
+    },
+  }), [colors, spacing]);
 
   // Reload data when screen comes into focus
   useFocusEffect(
@@ -160,88 +245,3 @@ export default function DashboardScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface[100], // Charcoal background
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.surface[100],
-  },
-  scrollView: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingTop: 60,
-    paddingBottom: spacing.md,
-  },
-  headerButton: {
-    paddingHorizontal: spacing.sm,
-  },
-  kpiContainer: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  sectionHeader: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    paddingTop: spacing.xs,
-  },
-  section: {
-    paddingHorizontal: spacing.md,
-  },
-  eventCard: {
-    marginBottom: spacing.sm,
-  },
-  eventHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: spacing.xs,
-  },
-  eventName: {
-    flex: 1,
-    marginRight: spacing.sm,
-    fontWeight: '600',
-  },
-  eventGame: {
-    color: colors.brand.violet, // Electric violet for game name
-    marginBottom: spacing.xs,
-  },
-  eventStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  eventRecord: {
-    fontWeight: '600',
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: spacing['2xl'],
-    marginTop: 60,
-  },
-  emptyTitle: {
-    marginBottom: spacing.sm,
-    textAlign: 'center',
-  },
-  emptyText: {
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-  },
-  emptyButton: {
-    paddingHorizontal: spacing.xl,
-  },
-});

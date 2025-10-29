@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -11,10 +11,51 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useThemeStore } from '../stores/themeStore';
 import { Title, H2, Body, Caption } from '../components/atoms/Text';
 import { Card } from '../components/atoms/Card';
-import { colors, spacing } from '../design/tokens';
+import { useTheme } from '../hooks/useTheme';
 
 export default function ProfileScreen() {
+  const { colors, spacing } = useTheme();
   const { isDark, toggleTheme } = useThemeStore();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface[100],
+    },
+    scrollView: {
+      flex: 1,
+    },
+    header: {
+      paddingHorizontal: spacing.md,
+      paddingTop: 60,
+      paddingBottom: spacing.md,
+    },
+    section: {
+      paddingHorizontal: spacing.md,
+      marginBottom: spacing['2xl'],
+    },
+    sectionTitle: {
+      marginBottom: spacing.sm,
+    },
+    settingRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    settingInfo: {
+      flex: 1,
+      marginRight: spacing.md,
+    },
+    settingLabel: {
+      fontWeight: '600',
+      marginBottom: 4,
+    },
+    dangerText: {
+      color: colors.brand.coral,
+      fontWeight: '600',
+      marginBottom: 4,
+    },
+  }), [colors, spacing]);
 
   const handleDarkModeToggle = async () => {
     await toggleTheme();
@@ -61,7 +102,8 @@ export default function ProfileScreen() {
               <Switch
                 value={isDark}
                 onValueChange={handleDarkModeToggle}
-                trackColor={{ false: colors.surface[400], true: colors.brand.emerald }}
+                trackColor={{ false: colors.brand.coral, true: colors.brand.emerald }}
+                ios_backgroundColor={colors.brand.coral}
                 thumbColor="#fff"
               />
             </View>
@@ -99,43 +141,3 @@ export default function ProfileScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface[100],
-  },
-  scrollView: {
-    flex: 1,
-  },
-  header: {
-    paddingHorizontal: spacing.md,
-    paddingTop: 60,
-    paddingBottom: spacing.md,
-  },
-  section: {
-    paddingHorizontal: spacing.md,
-    marginBottom: spacing['2xl'],
-  },
-  sectionTitle: {
-    marginBottom: spacing.sm,
-  },
-  settingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  settingInfo: {
-    flex: 1,
-    marginRight: spacing.md,
-  },
-  settingLabel: {
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  dangerText: {
-    color: colors.brand.coral,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-});

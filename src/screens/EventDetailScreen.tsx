@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -16,7 +16,7 @@ import { useMatchStore } from '../stores/matchStore';
 import { useDeckStore } from '../stores/deckStore';
 import { formatMatchDate } from '../utils/date';
 import { getLeaderImage, getColorBorderColor } from '../domain/gameTitle/onePieceAssets';
-import { colors, spacing } from '../design/tokens';
+import { useTheme } from '../hooks/useTheme';
 import { Title, H2, Body, Caption } from '../components/atoms/Text';
 import { Button } from '../components/atoms/Button';
 import { Card } from '../components/atoms/Card';
@@ -25,6 +25,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Event Detai
 type EventDetailRouteProp = RouteProp<RootStackParamList, 'Event Detail'>;
 
 export default function EventDetailScreen() {
+  const { colors, spacing } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<EventDetailRouteProp>();
 
@@ -32,6 +33,144 @@ export default function EventDetailScreen() {
   const { getEvent, loadEvents } = useEventStore();
   const { matches, loadMatches } = useMatchStore();
   const { decks, loadDecks } = useDeckStore();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface[100],
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.surface[100],
+    },
+    scrollView: {
+      flex: 1,
+    },
+    header: {
+      padding: spacing.lg,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.surface[200],
+    },
+    eventMeta: {
+      marginBottom: spacing.sm,
+      marginTop: spacing.sm,
+    },
+    eventNotes: {
+      lineHeight: 20,
+    },
+    statsContainer: {
+      flexDirection: 'row',
+      padding: spacing.lg,
+      gap: spacing.md,
+    },
+    statCard: {
+      flex: 1,
+      alignItems: 'center',
+    },
+    statLabel: {
+      marginBottom: spacing.xs,
+      textTransform: 'uppercase',
+    },
+    section: {
+      padding: spacing.lg,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.md,
+    },
+    dateSubheader: {
+      textTransform: 'uppercase',
+      marginTop: spacing.lg,
+      marginBottom: spacing.sm,
+      letterSpacing: 0.5,
+    },
+    dateSubheaderFirst: {
+      marginTop: 0,
+    },
+    roundCard: {
+      marginBottom: spacing.md,
+    },
+    onePieceCardLayout: {
+      flexDirection: 'row',
+      gap: spacing.md,
+    },
+    leaderImageContainer: {
+      width: '30%',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    leaderImageBorder: {
+      borderWidth: 3,
+      borderRadius: 12,
+      padding: 4,
+      overflow: 'hidden',
+    },
+    leaderImage: {
+      width: 80,
+      height: 80,
+      borderRadius: 8,
+    },
+    matchInfoContainer: {
+      flex: 1,
+    },
+    roundHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.sm,
+    },
+    resultBadge: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.xs,
+      borderRadius: 12,
+    },
+    resultText: {
+      color: '#fff',
+      fontWeight: '700',
+    },
+    matchup: {
+      marginBottom: spacing.xs,
+    },
+    opponent: {
+      marginBottom: spacing.sm,
+    },
+    matchDetails: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.md,
+    },
+    emptyState: {
+      alignItems: 'center',
+      padding: spacing.xl * 2,
+    },
+    emptyText: {
+      textAlign: 'center',
+      marginBottom: spacing.lg,
+    },
+    completedBanner: {
+      backgroundColor: '#34C759',
+      padding: spacing.lg,
+      borderRadius: 8,
+      alignItems: 'center',
+      marginTop: spacing.sm,
+    },
+    completedText: {
+      color: '#fff',
+      fontWeight: '600',
+    },
+    diceRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    diceText: {
+      marginLeft: 4,
+    },
+  }), [colors, spacing]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -331,141 +470,3 @@ export default function EventDetailScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface[100],
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.surface[100],
-  },
-  scrollView: {
-    flex: 1,
-  },
-  header: {
-    padding: spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.surface[200],
-  },
-  eventMeta: {
-    marginBottom: spacing.sm,
-    marginTop: spacing.sm,
-  },
-  eventNotes: {
-    lineHeight: 20,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    padding: spacing.lg,
-    gap: spacing.md,
-  },
-  statCard: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statLabel: {
-    marginBottom: spacing.xs,
-    textTransform: 'uppercase',
-  },
-  section: {
-    padding: spacing.lg,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  dateSubheader: {
-    textTransform: 'uppercase',
-    marginTop: spacing.lg,
-    marginBottom: spacing.sm,
-    letterSpacing: 0.5,
-  },
-  dateSubheaderFirst: {
-    marginTop: 0,
-  },
-  roundCard: {
-    marginBottom: spacing.md,
-  },
-  onePieceCardLayout: {
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  leaderImageContainer: {
-    width: '30%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  leaderImageBorder: {
-    borderWidth: 3,
-    borderRadius: 12,
-    padding: 4,
-    overflow: 'hidden',
-  },
-  leaderImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-  },
-  matchInfoContainer: {
-    flex: 1,
-  },
-  roundHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  resultBadge: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: 12,
-  },
-  resultText: {
-    color: '#fff',
-    fontWeight: '700',
-  },
-  matchup: {
-    marginBottom: spacing.xs,
-  },
-  opponent: {
-    marginBottom: spacing.sm,
-  },
-  matchDetails: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.md,
-  },
-  emptyState: {
-    alignItems: 'center',
-    padding: spacing.xl * 2,
-  },
-  emptyText: {
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-  },
-  completedBanner: {
-    backgroundColor: '#34C759',
-    padding: spacing.lg,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: spacing.sm,
-  },
-  completedText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  diceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  diceText: {
-    marginLeft: 4,
-  },
-});

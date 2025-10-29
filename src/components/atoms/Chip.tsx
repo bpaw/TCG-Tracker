@@ -2,10 +2,11 @@
  * Chip Component (Atom)
  * Status indicator with color-coded variants
  * Uses both color and text for accessibility (non-color cues)
+ * Theme-aware for light/dark mode support
  */
 
 import { Text, View, ViewProps } from 'react-native';
-import { styles as designStyles } from '../../design/styles';
+import { useTheme } from '../../hooks/useTheme';
 
 type ChipKind = 'win' | 'loss' | 'meta';
 
@@ -15,6 +16,8 @@ interface ChipProps extends Omit<ViewProps, 'children'> {
 }
 
 export function Chip({ kind, text, style, ...rest }: ChipProps) {
+  const { styles: designStyles } = useTheme();
+
   const kindStyles = {
     win: { container: designStyles.chipWin, text: designStyles.chipWinText },
     loss: { container: designStyles.chipLoss, text: designStyles.chipLossText },

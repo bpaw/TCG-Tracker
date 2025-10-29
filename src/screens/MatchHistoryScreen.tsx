@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -16,11 +16,12 @@ import { Title, Body } from '../components/atoms/Text';
 import MatchRow from '../components/MatchRow';
 import DropdownButton from '../components/DropdownButton';
 import { GameTitle, MatchResult } from '../domain/types';
-import { colors, spacing } from '../design/tokens';
+import { useTheme } from '../hooks/useTheme';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function MatchHistoryScreen() {
+  const { colors, spacing } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const { isDark } = useThemeStore();
 
@@ -30,6 +31,50 @@ export default function MatchHistoryScreen() {
   const [filterGame, setFilterGame] = useState<GameTitle | 'all'>('all');
   const [filterDeck, setFilterDeck] = useState<string>('all');
   const [filterResult, setFilterResult] = useState<MatchResult | 'all'>('all');
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface[100],
+    },
+    header: {
+      paddingHorizontal: spacing.md,
+      paddingTop: 60,
+      paddingBottom: spacing.md,
+    },
+    filterContainer: {
+      paddingHorizontal: spacing.md,
+      paddingTop: 0,
+    },
+    filterRow: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+      marginBottom: spacing.sm,
+    },
+    filterItem: {
+      flex: 1,
+    },
+    filterItemLarge: {
+      flex: 2,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    emptyState: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: spacing['2xl'],
+    },
+    emptyText: {
+      color: colors.text.muted,
+    },
+    listContent: {
+      paddingBottom: spacing.md,
+    },
+  }), [colors, spacing]);
 
   useEffect(() => {
     loadDecks();
@@ -146,47 +191,3 @@ export default function MatchHistoryScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface[100],
-  },
-  header: {
-    paddingHorizontal: spacing.md,
-    paddingTop: 60,
-    paddingBottom: spacing.md,
-  },
-  filterContainer: {
-    paddingHorizontal: spacing.md,
-    paddingTop: 0,
-  },
-  filterRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  filterItem: {
-    flex: 1,
-  },
-  filterItemLarge: {
-    flex: 2,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: spacing['2xl'],
-  },
-  emptyText: {
-    color: colors.text.muted,
-  },
-  listContent: {
-    paddingBottom: spacing.md,
-  },
-});

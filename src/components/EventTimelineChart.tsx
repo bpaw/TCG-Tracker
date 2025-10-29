@@ -1,15 +1,74 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { Circle } from 'react-native-svg';
 import { Match } from '../domain/types';
-import { colors, spacing } from '../design/tokens';
+import { useTheme } from '../hooks/useTheme';
 
 interface EventTimelineChartProps {
   matches: Match[];
 }
 
 export default function EventTimelineChart({ matches }: EventTimelineChartProps) {
+  const { colors, spacing } = useTheme();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      backgroundColor: colors.surface[300],
+      borderRadius: 12,
+      padding: spacing.md,
+      marginHorizontal: spacing.md,
+      marginBottom: spacing.md,
+    },
+    emptyContainer: {
+      backgroundColor: colors.surface[300],
+      borderRadius: 12,
+      padding: spacing.xl,
+      marginHorizontal: spacing.md,
+      marginBottom: spacing.md,
+      alignItems: 'center',
+    },
+    title: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: colors.text.primary,
+      marginBottom: 4,
+    },
+    subtitle: {
+      fontSize: 12,
+      color: colors.text.secondary,
+      marginBottom: 12,
+    },
+    chart: {
+      marginVertical: 8,
+      borderRadius: 16,
+    },
+    legend: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: spacing.xl,
+      marginTop: 12,
+    },
+    legendItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+    },
+    legendDot: {
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+    },
+    legendText: {
+      fontSize: 12,
+      color: colors.text.secondary,
+    },
+    emptyText: {
+      fontSize: 14,
+      color: colors.text.muted,
+    },
+  }), [colors, spacing]);
+
   if (matches.length === 0) {
     return (
       <View style={styles.emptyContainer}>
@@ -64,7 +123,7 @@ export default function EventTimelineChart({ matches }: EventTimelineChartProps)
           backgroundGradientTo: colors.surface[200],
           decimalPlaces: 0,
           color: (opacity = 1) => `rgba(124, 77, 255, ${opacity})`, // Electric violet
-          labelColor: (opacity = 1) => `rgba(148, 163, 184, ${opacity})`, // grayd-400
+          labelColor: (opacity = 1) => colors.text.secondary
           style: {
             borderRadius: 16,
           },
@@ -140,60 +199,3 @@ export default function EventTimelineChart({ matches }: EventTimelineChartProps)
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.surface[300],
-    borderRadius: 12,
-    padding: spacing.md,
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.md,
-  },
-  emptyContainer: {
-    backgroundColor: colors.surface[300],
-    borderRadius: 12,
-    padding: spacing.xl,
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.md,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text.primary,
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    marginBottom: 12,
-  },
-  chart: {
-    marginVertical: 8,
-    borderRadius: 16,
-  },
-  legend: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.xl,
-    marginTop: 12,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  legendDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  legendText: {
-    fontSize: 12,
-    color: colors.text.secondary,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: colors.text.muted,
-  },
-});

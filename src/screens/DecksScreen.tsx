@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -14,7 +14,7 @@ import { useMatchStore } from '../stores/matchStore';
 import { useUiStore } from '../stores/uiStore';
 import { Deck, GameTitle } from '../domain/types';
 import { getWinRate } from '../utils/stats';
-import { colors, spacing } from '../design/tokens';
+import { useTheme } from '../hooks/useTheme';
 import { Title, H2, Body, Caption } from '../components/atoms/Text';
 import { Button } from '../components/atoms/Button';
 import { Card } from '../components/atoms/Card';
@@ -22,11 +22,80 @@ import { Card } from '../components/atoms/Card';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function DecksScreen() {
+  const { colors, spacing } = useTheme();
   const navigation = useNavigation<NavigationProp>();
 
   const { decks, loadDecks, archiveDeck } = useDeckStore();
   const { matches, loadMatches } = useMatchStore();
   const { showToast } = useUiStore();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface[100],
+    },
+    scrollView: {
+      flex: 1,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: spacing.md,
+      paddingTop: 60,
+    },
+    emptyState: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: spacing.xl,
+      marginTop: 60,
+    },
+    emptyText: {
+      textAlign: 'center',
+    },
+    gameSection: {
+      marginBottom: spacing.lg,
+    },
+    gameTitle: {
+      paddingHorizontal: spacing.md,
+      marginBottom: spacing.sm,
+    },
+    deckCard: {
+      marginHorizontal: spacing.md,
+      marginBottom: spacing.sm,
+      padding: spacing.md,
+    },
+    deckCardArchived: {
+      opacity: 0.6,
+    },
+    deckHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: spacing.xs,
+    },
+    deckInfo: {
+      flex: 1,
+    },
+    deckTitle: {
+      fontWeight: '700',
+      marginBottom: spacing.xs,
+    },
+    deckTitleArchived: {
+      fontStyle: 'italic',
+    },
+    deckStats: {
+      marginTop: spacing.xs,
+    },
+    deckNotes: {
+      marginBottom: spacing.sm,
+    },
+    deckActions: {
+      flexDirection: 'row',
+      gap: spacing.xs,
+    },
+  }), [colors, spacing]);
 
   // Reload decks when screen comes into focus
   useFocusEffect(
@@ -169,71 +238,3 @@ export default function DecksScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface[100],
-  },
-  scrollView: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: spacing.md,
-    paddingTop: 60,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.xl,
-    marginTop: 60,
-  },
-  emptyText: {
-    textAlign: 'center',
-  },
-  gameSection: {
-    marginBottom: spacing.lg,
-  },
-  gameTitle: {
-    paddingHorizontal: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  deckCard: {
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.sm,
-    padding: spacing.md,
-  },
-  deckCardArchived: {
-    opacity: 0.6,
-  },
-  deckHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: spacing.xs,
-  },
-  deckInfo: {
-    flex: 1,
-  },
-  deckTitle: {
-    fontWeight: '700',
-    marginBottom: spacing.xs,
-  },
-  deckTitleArchived: {
-    fontStyle: 'italic',
-  },
-  deckStats: {
-    marginTop: spacing.xs,
-  },
-  deckNotes: {
-    marginBottom: spacing.sm,
-  },
-  deckActions: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-  },
-});

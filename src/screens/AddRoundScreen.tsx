@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -33,7 +33,7 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import { onePieceColors } from '../domain/gameTitle/onePiece';
 import leaders from '../data/_data/leaders.json';
-import { colors, spacing } from '../design/tokens';
+import { useTheme } from '../hooks/useTheme';
 import { Title, Body, Caption } from '../components/atoms/Text';
 import { Button } from '../components/atoms/Button';
 
@@ -41,6 +41,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Add Round'>
 type AddRoundRouteProp = RouteProp<RootStackParamList, 'Add Round'>;
 
 export default function AddRoundScreen() {
+  const { colors, spacing } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<AddRoundRouteProp>();
 
@@ -55,6 +56,96 @@ export default function AddRoundScreen() {
 
   const event = getEvent(eventId);
   const isOnePiece = event?.game === 'One Piece';
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surface[100],
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingBottom: spacing.lg,
+    },
+    form: {
+      padding: spacing.md,
+    },
+    field: {
+      marginBottom: spacing.lg,
+    },
+    infoCard: {
+      backgroundColor: colors.surface[300],
+      padding: spacing.md,
+      borderRadius: 8,
+      marginBottom: spacing.lg,
+    },
+    infoLabel: {
+      color: colors.brand.violet,
+      marginBottom: 4,
+    },
+    infoValue: {
+      color: colors.text.primary,
+    },
+    picker: {
+      backgroundColor: colors.surface[300],
+      borderWidth: 1,
+      borderColor: colors.surface[400],
+      borderRadius: 8,
+      overflow: 'hidden',
+    },
+    pickerInput: {
+      color: colors.text.primary,
+    },
+    onePiecePicker: {
+      marginBottom: spacing.sm,
+    },
+    errorText: {
+      color: colors.brand.coral,
+      marginTop: 4,
+    },
+    booleanButtons: {
+      flexDirection: 'row',
+      gap: spacing.xs,
+    },
+    booleanButton: {
+      flex: 1,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
+      borderRadius: 8,
+      backgroundColor: colors.surface[300],
+      alignItems: 'center',
+    },
+    booleanButtonActive: {
+      backgroundColor: colors.brand.violet,
+    },
+    booleanButtonText: {
+      color: colors.text.secondary,
+    },
+    booleanButtonTextActive: {
+      color: colors.text.primary,
+    },
+    footer: {
+      padding: spacing.md,
+      paddingBottom: spacing['2xl'],
+      borderTopWidth: 1,
+      borderTopColor: colors.surface[300],
+      backgroundColor: colors.surface[100],
+    },
+    dateButton: {
+      backgroundColor: colors.surface[300],
+      borderWidth: 1,
+      borderColor: colors.surface[400],
+      borderRadius: 8,
+      padding: spacing.sm,
+      minHeight: 44,
+      justifyContent: 'center',
+    },
+    doneButton: {
+      marginTop: spacing.xs,
+    },
+  }), [colors, spacing]);
 
   // Autofill date logic: use current date unless it's after event end date
   const getDefaultDate = () => {
@@ -462,93 +553,3 @@ export default function AddRoundScreen() {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.surface[100],
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: spacing.lg,
-  },
-  form: {
-    padding: spacing.md,
-  },
-  field: {
-    marginBottom: spacing.lg,
-  },
-  infoCard: {
-    backgroundColor: colors.surface[300],
-    padding: spacing.md,
-    borderRadius: 8,
-    marginBottom: spacing.lg,
-  },
-  infoLabel: {
-    color: colors.brand.violet,
-    marginBottom: 4,
-  },
-  infoValue: {
-    color: colors.text.primary,
-  },
-  picker: {
-    backgroundColor: colors.surface[300],
-    borderWidth: 1,
-    borderColor: colors.surface[400],
-    borderRadius: 8,
-    overflow: 'hidden',
-  },
-  pickerInput: {
-    color: colors.text.primary,
-  },
-  onePiecePicker: {
-    marginBottom: spacing.sm,
-  },
-  errorText: {
-    color: colors.brand.coral,
-    marginTop: 4,
-  },
-  booleanButtons: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-  },
-  booleanButton: {
-    flex: 1,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderRadius: 8,
-    backgroundColor: colors.surface[300],
-    alignItems: 'center',
-  },
-  booleanButtonActive: {
-    backgroundColor: colors.brand.violet,
-  },
-  booleanButtonText: {
-    color: colors.text.secondary,
-  },
-  booleanButtonTextActive: {
-    color: colors.text.primary,
-  },
-  footer: {
-    padding: spacing.md,
-    paddingBottom: spacing['2xl'],
-    borderTopWidth: 1,
-    borderTopColor: colors.surface[300],
-    backgroundColor: colors.surface[100],
-  },
-  dateButton: {
-    backgroundColor: colors.surface[300],
-    borderWidth: 1,
-    borderColor: colors.surface[400],
-    borderRadius: 8,
-    padding: spacing.sm,
-    minHeight: 44,
-    justifyContent: 'center',
-  },
-  doneButton: {
-    marginTop: spacing.xs,
-  },
-});

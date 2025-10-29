@@ -4,9 +4,9 @@
  * Ensures ≥44dp touch target for accessibility
  */
 
-import { Pressable, View, PressableProps, StyleSheet } from 'react-native';
+import { Pressable, View, PressableProps } from 'react-native';
 import { Body, Caption } from '../atoms/Text';
-import { spacing } from '../../design/tokens';
+import { useTheme } from '../../hooks/useTheme';
 
 interface ListItemProps extends Omit<PressableProps, 'children'> {
   title: string;
@@ -14,28 +14,6 @@ interface ListItemProps extends Omit<PressableProps, 'children'> {
   leftElement?: React.ReactNode;
   rightElement?: React.ReactNode;
 }
-
-const listItemStyles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    minHeight: 44,
-  },
-  leftElement: {
-    marginRight: spacing.sm,
-  },
-  content: {
-    flex: 1,
-  },
-  subtitle: {
-    marginTop: 2,
-  },
-  rightElement: {
-    marginLeft: spacing.sm,
-  },
-});
 
 export function ListItem({
   title,
@@ -45,16 +23,23 @@ export function ListItem({
   style,
   ...rest
 }: ListItemProps) {
+  const { spacing } = useTheme();
   return (
-    <Pressable style={[listItemStyles.container, style]} {...rest}>
-      {leftElement && <View style={listItemStyles.leftElement}>{leftElement}</View>}
+    <Pressable style={[{
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
+      minHeight: 44,
+    }, style]} {...rest}>
+      {leftElement && <View style={{ marginRight: spacing.sm }}>{leftElement}</View>}
 
-      <View style={listItemStyles.content}>
+      <View style={{ flex: 1 }}>
         <Body>{title}</Body>
-        {subtitle && <Caption style={listItemStyles.subtitle}>{subtitle}</Caption>}
+        {subtitle && <Caption style={{ marginTop: 2 }}>{subtitle}</Caption>}
       </View>
 
-      {rightElement && <View style={listItemStyles.rightElement}>{rightElement}</View>}
+      {rightElement && <View style={{ marginLeft: spacing.sm }}>{rightElement}</View>}
     </Pressable>
   );
 }

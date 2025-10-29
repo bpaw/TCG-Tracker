@@ -1,16 +1,22 @@
 /**
  * Design Tokens
  * Source of truth for colors, spacing, typography, and other design values
- * Based on Gamer Energy theme (dark-first)
+ * Supports both light and dark modes
  */
 
-export const colors = {
+// Brand colors - consistent across both themes
+const brandColors = {
+  violet: '#7C4DFF',    // Electric violet (primary)
+  emerald: '#4ADE80',   // Success / Win
+  coral: '#F87171',     // Error / Loss
+  amber: '#FBBF24',     // Highlight / Meta
+};
+
+// Dark mode color palette
+const darkColors = {
   brand: {
-    violet: '#7C4DFF',    // Electric violet (primary)
+    ...brandColors,
     charcoal: '#121826',  // Background / canvas
-    emerald: '#4ADE80',   // Success / Win
-    coral: '#F87171',     // Error / Loss
-    amber: '#FBBF24',     // Highlight / Meta
   },
   surface: {
     0: '#0D1117',   // deep canvas (rare)
@@ -37,6 +43,51 @@ export const colors = {
     900: '#0B1220',
   },
 };
+
+// Light mode color palette
+const lightColors = {
+  brand: {
+    ...brandColors,
+    charcoal: '#FFFFFF',  // White background
+  },
+  surface: {
+    0: '#FFFFFF',   // white
+    100: '#F8FAFC', // main app background (off-white)
+    200: '#F1F5F9', // section bg (light gray)
+    300: '#FFFFFF', // cards (white)
+    400: '#E2E8F0', // elevated cards / headers (light gray)
+  },
+  text: {
+    primary: '#0F172A',   // very dark gray/black
+    secondary: '#475569', // medium gray
+    muted: '#94A3B8',     // light gray
+  },
+  grayd: {
+    50: '#F8FAFC',
+    100: '#F1F5F9',
+    200: '#E2E8F0',
+    300: '#CBD5E1',
+    400: '#94A3B8',
+    500: '#64748B',
+    600: '#475569',
+    700: '#334155',
+    800: '#1F2937',
+    900: '#0B1220',
+  },
+};
+
+/**
+ * Get theme-specific colors based on dark mode state
+ * @param isDark - Whether dark mode is enabled
+ * @returns Theme-specific color palette
+ */
+export function getThemeColors(isDark: boolean) {
+  return isDark ? darkColors : lightColors;
+}
+
+// Legacy export for backward compatibility (defaults to dark mode)
+// Components should migrate to using getThemeColors() instead
+export const colors = darkColors;
 
 export const spacing = {
   xs: 8,

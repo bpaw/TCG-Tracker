@@ -1,13 +1,21 @@
 /**
  * Semantic Style Recipes
  * Pre-composed StyleSheet objects for consistent styling across the app
- * Based on Gamer Energy theme (dark-first)
+ * Supports both light and dark themes
  */
 
 import { StyleSheet } from 'react-native';
-import { colors, spacing, radius, typography, shadows } from './tokens';
+import { getThemeColors, spacing, radius, typography, shadows } from './tokens';
 
-export const styles = StyleSheet.create({
+/**
+ * Create theme-aware styles
+ * @param isDark - Whether dark mode is enabled
+ * @returns StyleSheet with theme-appropriate colors
+ */
+export function createStyles(isDark: boolean) {
+  const colors = getThemeColors(isDark);
+
+  return StyleSheet.create({
   // Screen containers
   screen: {
     flex: 1,
@@ -84,7 +92,9 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.brand.violet,
   },
   btnNeutral: {
-    backgroundColor: colors.surface[400],
+    backgroundColor: isDark ? colors.surface[400] : colors.surface[300],
+    borderWidth: isDark ? 0 : 1,
+    borderColor: isDark ? 'transparent' : colors.surface[400],
   },
   btnSuccess: {
     backgroundColor: colors.brand.emerald,
@@ -94,6 +104,11 @@ export const styles = StyleSheet.create({
   },
   btnText: {
     color: '#FFFFFF',
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+  },
+  btnTextNeutral: {
+    color: colors.text.primary,
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.semibold,
   },
@@ -142,4 +157,9 @@ export const styles = StyleSheet.create({
     backgroundColor: `${colors.surface[400]}66`, // 40% opacity
     marginVertical: spacing.sm,
   },
-});
+  });
+}
+
+// Legacy export for backward compatibility (defaults to dark mode)
+// Components should migrate to using createStyles() instead
+export const styles = createStyles(true);
