@@ -1,5 +1,5 @@
 import * as SQLite from 'expo-sqlite';
-import { CREATE_TABLES, SCHEMA_VERSION } from './schema';
+import { CREATE_TABLES, SCHEMA_VERSION, MIGRATION_V1_TO_V2 } from './schema';
 
 let db: SQLite.SQLiteDatabase | null = null;
 
@@ -23,8 +23,13 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 
   const currentVersion = result?.user_version || 0;
 
-  if (currentVersion < SCHEMA_VERSION) {
+  if (currentVersion === 0) {
+    // New database - create all tables
     await initializeSchema();
+    await db.execAsync(`PRAGMA user_version = ${SCHEMA_VERSION};`);
+  } else if (currentVersion < SCHEMA_VERSION) {
+    // Existing database - run migrations
+    await runMigrations(currentVersion);
     await db.execAsync(`PRAGMA user_version = ${SCHEMA_VERSION};`);
   }
 
@@ -32,7 +37,7 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 }
 
 /**
- * Initialize database schema
+ * Initialize database schema (for new databases)
  */
 async function initializeSchema(): Promise<void> {
   if (!db) {
@@ -42,6 +47,25 @@ async function initializeSchema(): Promise<void> {
   console.log('Initializing SQLite schema...');
   await db.execAsync(CREATE_TABLES);
   console.log('SQLite schema initialized');
+}
+
+/**
+ * Run database migrations
+ */
+async function runMigrations(fromVersion: number): Promise<void> {
+  if (!db) {
+    throw new Error('Database not initialized');
+  }
+
+  console.log(`Migrating database from version ${fromVersion} to ${SCHEMA_VERSION}`);
+
+  // Run migrations sequentially
+  if (fromVersion < 2) {
+    console.log('Running migration v1 -> v2: Adding user_id columns');
+    await db.execAsync(MIGRATION_V1_TO_V2);
+  }
+
+  console.log('Database migration completed');
 }
 
 /**

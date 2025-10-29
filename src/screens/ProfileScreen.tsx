@@ -9,13 +9,16 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useThemeStore } from '../stores/themeStore';
+import { useAuthStore } from '../stores/authStore';
 import { Title, H2, Body, Caption } from '../components/atoms/Text';
 import { Card } from '../components/atoms/Card';
+import { Button } from '../components/atoms/Button';
 import { useTheme } from '../hooks/useTheme';
 
 export default function ProfileScreen() {
   const { colors, spacing } = useTheme();
   const { isDark, toggleTheme } = useThemeStore();
+  const { user, signOut } = useAuthStore();
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -61,6 +64,23 @@ export default function ProfileScreen() {
     await toggleTheme();
   };
 
+  const handleSignOut = () => {
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: async () => {
+            await signOut();
+          },
+        },
+      ]
+    );
+  };
+
   const handleClearData = () => {
     Alert.alert(
       'Clear All Data',
@@ -89,6 +109,27 @@ export default function ProfileScreen() {
         <View style={styles.header}>
           <Title>Settings</Title>
         </View>
+
+        {/* Account Section */}
+        {user && (
+          <View style={styles.section}>
+            <H2 style={styles.sectionTitle}>Account</H2>
+            <Card>
+              <View style={styles.settingRow}>
+                <View style={styles.settingInfo}>
+                  <Body style={styles.settingLabel}>Email</Body>
+                  <Caption>{user.email}</Caption>
+                </View>
+              </View>
+            </Card>
+            <Button
+              title="Sign Out"
+              intent="danger"
+              onPress={handleSignOut}
+              style={{ marginTop: spacing.md }}
+            />
+          </View>
+        )}
 
         {/* Appearance Section */}
         <View style={styles.section}>

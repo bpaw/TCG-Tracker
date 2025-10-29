@@ -2,15 +2,17 @@
  * SQLite database schema and migrations
  */
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 /**
  * SQL statements to create all tables
+ * NOTE: user_id is optional (NULL) to support both authenticated and local-only usage
  */
 export const CREATE_TABLES = `
   -- Events table
   CREATE TABLE IF NOT EXISTS events (
     id TEXT PRIMARY KEY NOT NULL,
+    user_id TEXT,
     name TEXT NOT NULL,
     game TEXT NOT NULL,
     startDate TEXT NOT NULL,
@@ -24,6 +26,7 @@ export const CREATE_TABLES = `
   -- Matches table
   CREATE TABLE IF NOT EXISTS matches (
     id TEXT PRIMARY KEY NOT NULL,
+    user_id TEXT,
     eventId TEXT,
     game TEXT NOT NULL,
     myDeckId TEXT,
@@ -47,6 +50,7 @@ export const CREATE_TABLES = `
   -- Decks table
   CREATE TABLE IF NOT EXISTS decks (
     id TEXT PRIMARY KEY NOT NULL,
+    user_id TEXT,
     title TEXT NOT NULL,
     game TEXT NOT NULL,
     archetype TEXT,
@@ -67,12 +71,35 @@ export const CREATE_TABLES = `
   -- Create indices for better query performance
   CREATE INDEX IF NOT EXISTS idx_events_startDate ON events(startDate);
   CREATE INDEX IF NOT EXISTS idx_events_game ON events(game);
+  CREATE INDEX IF NOT EXISTS idx_events_userId ON events(user_id);
   CREATE INDEX IF NOT EXISTS idx_matches_date ON matches(date);
   CREATE INDEX IF NOT EXISTS idx_matches_eventId ON matches(eventId);
   CREATE INDEX IF NOT EXISTS idx_matches_game ON matches(game);
   CREATE INDEX IF NOT EXISTS idx_matches_deckId ON matches(myDeckId);
+  CREATE INDEX IF NOT EXISTS idx_matches_userId ON matches(user_id);
   CREATE INDEX IF NOT EXISTS idx_decks_game ON decks(game);
+  CREATE INDEX IF NOT EXISTS idx_decks_userId ON decks(user_id);
   CREATE INDEX IF NOT EXISTS idx_calendar_date ON calendar(date);
+`;
+
+/**
+ * Migration from version 1 to version 2
+ * Adds user_id column to existing tables
+ */
+export const MIGRATION_V1_TO_V2 = `
+  -- Add user_id column to events table
+  ALTER TABLE events ADD COLUMN user_id TEXT;
+
+  -- Add user_id column to matches table
+  ALTER TABLE matches ADD COLUMN user_id TEXT;
+
+  -- Add user_id column to decks table
+  ALTER TABLE decks ADD COLUMN user_id TEXT;
+
+  -- Create new indices for user_id
+  CREATE INDEX IF NOT EXISTS idx_events_userId ON events(user_id);
+  CREATE INDEX IF NOT EXISTS idx_matches_userId ON matches(user_id);
+  CREATE INDEX IF NOT EXISTS idx_decks_userId ON decks(user_id);
 `;
 
 /**

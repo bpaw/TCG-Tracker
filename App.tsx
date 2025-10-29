@@ -4,14 +4,17 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import RootNavigator from './src/navigation/RootNavigator';
 import { useUiStore } from './src/stores/uiStore';
 import { useThemeStore } from './src/stores/themeStore';
+import { useAuthStore } from './src/stores/authStore';
 
 export default function App() {
   const { isDark, loadTheme } = useThemeStore();
   const { initialized, initialize, toast, hideToast } = useUiStore();
+  const { initialize: initializeAuth } = useAuthStore();
 
   useEffect(() => {
     loadTheme();
     initialize();
+    initializeAuth();
   }, []);
 
   if (!initialized) {
