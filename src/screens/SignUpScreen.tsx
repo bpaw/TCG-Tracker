@@ -123,13 +123,8 @@ export default function SignUpScreen() {
 
     if (error) {
       Alert.alert('Sign Up Failed', error.message);
-    } else {
-      Alert.alert(
-        'Success',
-        'Account created successfully! Please check your email to verify your account.',
-        [{ text: 'OK', onPress: () => navigation.goBack() }]
-      );
     }
+    // Paywall will be shown automatically by AppNavigator
   };
 
   const handleGoogleSignIn = async () => {
@@ -138,14 +133,16 @@ export default function SignUpScreen() {
     if (error) {
       Alert.alert('Google Sign In Failed', error.message);
     }
+    // Paywall will be shown automatically by AppNavigator
   };
 
   const handleAppleSignIn = async () => {
-    const { error } = await signInWithApple();
+    const { error} = await signInWithApple();
 
     if (error) {
       Alert.alert('Apple Sign In Failed', error.message);
     }
+    // Paywall will be shown automatically by AppNavigator
   };
 
   const handleSignIn = () => {

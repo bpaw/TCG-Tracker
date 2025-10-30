@@ -1,6 +1,7 @@
 import { Event, Match, Deck } from '../../domain/types';
 import { Repository, StorageType } from './interfaces';
 import { getStorageType } from './config';
+import { useSubscriptionStore } from '../../stores/subscriptionStore';
 
 // AsyncStorage implementations
 import { AsyncStorageEventRepository } from './asyncstorage/AsyncStorageEventRepository';
@@ -100,9 +101,24 @@ class RepositoryFactory {
 
   /**
    * Create a repository instance from the registry
+   * Automatically selects storage type based on subscription status:
+   * - Premium users → Cloud storage (hybrid SQLite + cloud sync)
+   * - Free users → SQLite storage (with limits)
    */
   private createRepository<T>(entityType: EntityType): Repository<T> {
-    const storageType = getStorageType();
+    // Get subscription status to determine storage type
+    const { subscriptionType } = useSubscriptionStore.getState();
+
+    // Subscription-based storage selection
+    let storageType: StorageType;
+    if (subscriptionType === 'premium') {
+      storageType = 'cloud';
+      console.log(`[Factory] Premium user detected, using cloud storage`);
+    } else {
+      storageType = 'sqlite';
+      console.log(`[Factory] Free user detected, using sqlite storage`);
+    }
+
     const entityRegistry = REPOSITORY_REGISTRY[entityType];
 
     if (!entityRegistry) {

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -7,6 +7,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useThemeStore } from '../stores/themeStore';
 import { useAuthStore } from '../stores/authStore';
 import { useTheme } from '../hooks/useTheme';
+import { useNavigation } from '@react-navigation/native';
 
 // App Screens
 import DashboardScreen from '../screens/DashboardScreen';
@@ -24,6 +25,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
+import PaywallScreen from '../screens/PaywallScreen';
 
 // Type definitions for navigation
 export type RootTabParamList = {
@@ -38,6 +40,7 @@ export type AuthStackParamList = {
   Login: undefined;
   'Sign Up': undefined;
   'Forgot Password': undefined;
+  Paywall: undefined;
 };
 
 export type AppStackParamList = {
@@ -47,6 +50,7 @@ export type AppStackParamList = {
   'Add Round': { eventId: string; roundNumber: number };
   'Match Detail': { matchId: string };
   'Edit Deck': { deckId?: string };
+  Paywall: undefined;
 };
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
@@ -150,13 +154,34 @@ function AuthNavigator() {
         component={ForgotPasswordScreen}
         options={{ headerShown: true, title: 'Reset Password' }}
       />
+      <AuthStack.Screen
+        name="Paywall"
+        component={PaywallScreen}
+        options={{ headerShown: false }}
+      />
     </AuthStack.Navigator>
   );
+}
+
+// Wrapper component that checks for paywall flag and redirects
+function MainTabsWrapper() {
+  const navigation = useNavigation<any>();
+  const { shouldShowPaywall } = useAuthStore();
+
+  useEffect(() => {
+    if (shouldShowPaywall) {
+      // Navigate to paywall immediately when this screen mounts
+      navigation.navigate('Paywall');
+    }
+  }, [shouldShowPaywall, navigation]);
+
+  return <MainTabs />;
 }
 
 // App Navigator - for authenticated users
 function AppNavigator() {
   const { colors } = useTheme();
+  const { clearPaywallFlag } = useAuthStore();
 
   const screenOptions = useMemo(() => ({
     headerShown: true,
@@ -173,7 +198,7 @@ function AppNavigator() {
     <AppStack.Navigator screenOptions={screenOptions}>
       <AppStack.Screen
         name="Main"
-        component={MainTabs}
+        component={MainTabsWrapper}
         options={{ headerShown: false }}
       />
       <AppStack.Screen
@@ -213,6 +238,20 @@ function AppNavigator() {
           presentation: 'modal',
           title: route.params?.deckId ? 'Edit Deck' : 'New Deck',
         })}
+      />
+      <AppStack.Screen
+        name="Paywall"
+        component={PaywallScreen}
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+        }}
+        listeners={{
+          blur: () => {
+            // Clear the paywall flag when navigating away from paywall
+            clearPaywallFlag();
+          },
+        }}
       />
     </AppStack.Navigator>
   );

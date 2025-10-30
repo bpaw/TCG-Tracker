@@ -3,6 +3,7 @@ import { Deck, GameTitle } from '../../../domain/types';
 import { Repository } from '../interfaces';
 import { getDatabase } from './database';
 import { useAuthStore } from '../../../stores/authStore';
+import { useSubscriptionStore } from '../../../stores/subscriptionStore';
 
 export interface DeckFilters {
   game?: GameTitle;
@@ -57,6 +58,13 @@ export class SQLiteDeckRepository implements Repository<Deck> {
 
     if (!userId) {
       throw new Error('User not authenticated');
+    }
+
+    // Check subscription limits for free tier
+    const { canCreateDeck } = useSubscriptionStore.getState();
+    const currentDecks = await this.list();
+    if (!canCreateDeck(currentDecks.length)) {
+      throw new Error('Deck limit reached. Upgrade to Premium for unlimited decks.');
     }
 
     const newDeck: Deck = {

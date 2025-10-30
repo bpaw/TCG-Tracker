@@ -13,6 +13,7 @@ interface AuthState {
   user: User | null;
   loading: boolean;
   initialized: boolean;
+  shouldShowPaywall: boolean;
 
   // Actions
   initialize: () => Promise<void>;
@@ -24,6 +25,7 @@ interface AuthState {
   signInWithApple: () => Promise<{ error: AuthError | Error | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
+  clearPaywallFlag: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -31,6 +33,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   loading: true,
   initialized: false,
+  shouldShowPaywall: false,
 
   initialize: async () => {
     try {
@@ -99,6 +102,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       session,
       user: session?.user ?? null,
       loading: false,
+      shouldShowPaywall: true, // Show paywall for new sign-ups
     });
 
     return { error: null };
@@ -142,5 +146,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     });
 
     return { error };
+  },
+
+  clearPaywallFlag: () => {
+    set({ shouldShowPaywall: false });
   },
 }));

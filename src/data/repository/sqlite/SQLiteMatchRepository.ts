@@ -3,6 +3,7 @@ import { Match, GameTitle, MatchResult } from '../../../domain/types';
 import { Repository } from '../interfaces';
 import { getDatabase } from './database';
 import { useAuthStore } from '../../../stores/authStore';
+import { useSubscriptionStore } from '../../../stores/subscriptionStore';
 
 export interface MatchFilters {
   game?: GameTitle;
@@ -93,6 +94,13 @@ export class SQLiteMatchRepository implements Repository<Match> {
 
     if (!userId) {
       throw new Error('User not authenticated');
+    }
+
+    // Check subscription limits for free tier
+    const { canCreateMatch } = useSubscriptionStore.getState();
+    const currentMatches = await this.list();
+    if (!canCreateMatch(currentMatches.length)) {
+      throw new Error('Match limit reached. Upgrade to Premium for unlimited matches.');
     }
 
     const newMatch: Match = {

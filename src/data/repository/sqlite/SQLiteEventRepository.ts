@@ -3,6 +3,7 @@ import { Event } from '../../../domain/types';
 import { Repository } from '../interfaces';
 import { getDatabase } from './database';
 import { useAuthStore } from '../../../stores/authStore';
+import { useSubscriptionStore } from '../../../stores/subscriptionStore';
 
 export class SQLiteEventRepository implements Repository<Event> {
   private getCurrentUserId(): string | null {
@@ -46,6 +47,13 @@ export class SQLiteEventRepository implements Repository<Event> {
 
     if (!userId) {
       throw new Error('User not authenticated');
+    }
+
+    // Check subscription limits for free tier
+    const { canCreateEvent } = useSubscriptionStore.getState();
+    const currentEvents = await this.list();
+    if (!canCreateEvent(currentEvents.length)) {
+      throw new Error('Event limit reached. Upgrade to Premium for unlimited events.');
     }
 
     const newEvent: Event = {

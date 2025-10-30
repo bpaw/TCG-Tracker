@@ -149,3 +149,35 @@ CREATE TRIGGER set_decks_updated_at
   BEFORE UPDATE ON public.decks
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_updated_at();
+
+-- User Profiles Table (for subscription management)
+CREATE TABLE IF NOT EXISTS public.user_profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  subscription_type TEXT NOT NULL DEFAULT 'free' CHECK (subscription_type IN ('free', 'premium')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Index for user profiles
+CREATE INDEX IF NOT EXISTS idx_user_profiles_subscription_type ON public.user_profiles(subscription_type);
+
+-- User Profiles RLS
+ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own profile"
+  ON public.user_profiles FOR SELECT
+  USING (auth.uid() = id);
+
+CREATE POLICY "Users can insert their own profile"
+  ON public.user_profiles FOR INSERT
+  WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Users can update their own profile"
+  ON public.user_profiles FOR UPDATE
+  USING (auth.uid() = id);
+
+-- Trigger for user_profiles updated_at
+CREATE TRIGGER set_user_profiles_updated_at
+  BEFORE UPDATE ON public.user_profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_updated_at();

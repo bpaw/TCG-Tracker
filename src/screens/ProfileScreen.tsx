@@ -9,9 +9,12 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useThemeStore } from '../stores/themeStore';
 import { useAuthStore } from '../stores/authStore';
 import { useStorageStore } from '../stores/storageStore';
+import { useSubscriptionStore } from '../stores/subscriptionStore';
 import { Title, H2, Body, Caption } from '../components/atoms/Text';
 import { Card } from '../components/atoms/Card';
 import { Button } from '../components/atoms/Button';
@@ -20,11 +23,15 @@ import { StorageType } from '../data/repository/interfaces';
 import { cloudSyncService } from '../data/repository/cloud/cloudSyncService';
 import { checkSupabaseSetup, getSetupInstructions } from '../data/repository/cloud/supabaseSetup';
 
+type NavigationProp = NativeStackNavigationProp<any>;
+
 export default function ProfileScreen() {
   const { colors, spacing } = useTheme();
+  const navigation = useNavigation<NavigationProp>();
   const { isDark, toggleTheme } = useThemeStore();
   const { user, signOut } = useAuthStore();
   const { storageType, isChangingStorage, setStorageTypeAsync } = useStorageStore();
+  const { subscriptionType, getLimits } = useSubscriptionStore();
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncProgress, setSyncProgress] = useState({ completed: 0, total: 0 });
@@ -285,6 +292,61 @@ export default function ProfileScreen() {
             />
           </View>
         )}
+
+        {/* Subscription Section */}
+        <View style={styles.section}>
+          <H2 style={styles.sectionTitle}>Subscription</H2>
+          <Card>
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <Body style={styles.settingLabel}>Current Plan</Body>
+                <Caption style={{
+                  color: subscriptionType === 'premium' ? colors.brand.emerald : colors.text.secondary,
+                  fontWeight: '600'
+                }}>
+                  {subscriptionType === 'premium' ? 'Premium' : 'Free'}
+                </Caption>
+              </View>
+            </View>
+            <View style={{ height: 1, backgroundColor: colors.surface[300], marginVertical: spacing.sm }} />
+            <View style={styles.settingInfo}>
+              <Body style={[styles.settingLabel, { marginBottom: spacing.xs }]}>Plan Limits</Body>
+              <Caption>
+                Events: {getLimits().maxEvents === null ? 'Unlimited' : `${getLimits().maxEvents} max`}
+              </Caption>
+              <Caption>
+                Decks: {getLimits().maxDecks === null ? 'Unlimited' : `${getLimits().maxDecks} max`}
+              </Caption>
+              <Caption>
+                Matches: {getLimits().maxMatches === null ? 'Unlimited' : `${getLimits().maxMatches} max`}
+              </Caption>
+              <Caption style={{ marginTop: spacing.xs }}>
+                Cloud Sync: {subscriptionType === 'premium' ? 'Enabled' : 'Disabled'}
+              </Caption>
+            </View>
+            {subscriptionType === 'free' && (
+              <>
+                <View style={{ height: 1, backgroundColor: colors.surface[300], marginVertical: spacing.sm }} />
+                <View style={styles.settingInfo}>
+                  <Body style={{ marginBottom: spacing.xs, fontWeight: '600', color: colors.brand.emerald }}>
+                    Upgrade to Premium
+                  </Body>
+                  <Caption>
+                    Get unlimited events, decks, and matches plus automatic cloud backup
+                  </Caption>
+                  <Caption style={{ marginTop: spacing.xs, marginBottom: spacing.md }}>
+                    $4/month or $35/year
+                  </Caption>
+                  <Button
+                    title="View Premium Plans"
+                    intent="primary"
+                    onPress={() => navigation.navigate('Paywall' as never)}
+                  />
+                </View>
+              </>
+            )}
+          </Card>
+        </View>
 
         {/* Appearance Section */}
         <View style={styles.section}>

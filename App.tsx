@@ -6,6 +6,7 @@ import { useUiStore } from './src/stores/uiStore';
 import { useThemeStore } from './src/stores/themeStore';
 import { useAuthStore } from './src/stores/authStore';
 import { useStorageStore } from './src/stores/storageStore';
+import { useSubscriptionStore } from './src/stores/subscriptionStore';
 import { initializeConfig } from './src/data/repository/config';
 
 export default function App() {
@@ -13,6 +14,7 @@ export default function App() {
   const { initialized, initialize, toast, hideToast } = useUiStore();
   const { initialize: initializeAuth } = useAuthStore();
   const { loadStorageType } = useStorageStore();
+  const { initialize: initializeSubscription } = useSubscriptionStore();
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -21,6 +23,7 @@ export default function App() {
       initializeAuth();
       await initializeConfig(); // Load storage preference from AsyncStorage
       loadStorageType(); // Sync store with loaded config
+      await initializeSubscription(); // Initialize RevenueCat and load subscription status
     };
 
     initializeApp();
