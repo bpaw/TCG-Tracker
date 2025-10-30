@@ -5,6 +5,7 @@ import {
   FlatList,
   useColorScheme,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -12,7 +13,9 @@ import { RootStackParamList } from '../navigation/RootNavigator';
 import { useDeckStore } from '../stores/deckStore';
 import { useMatchStore } from '../stores/matchStore';
 import { useThemeStore } from '../stores/themeStore';
+import { useUiStore } from '../stores/uiStore';
 import { Title, Body } from '../components/atoms/Text';
+import { SwipeableDelete } from '../components/molecules/SwipeableDelete';
 import MatchRow from '../components/MatchRow';
 import DropdownButton from '../components/DropdownButton';
 import { GameTitle, MatchResult } from '../domain/types';
@@ -26,7 +29,8 @@ export default function MatchHistoryScreen() {
   const { isDark } = useThemeStore();
 
   const { decks, loadDecks } = useDeckStore();
-  const { matches, loadMatches, loading } = useMatchStore();
+  const { matches, loadMatches, deleteMatch, loading } = useMatchStore();
+  const { showToast } = useUiStore();
 
   const [filterGame, setFilterGame] = useState<GameTitle | 'all'>('all');
   const [filterDeck, setFilterDeck] = useState<string>('all');
@@ -93,6 +97,33 @@ export default function MatchHistoryScreen() {
 
   const handleMatchPress = (matchId: string) => {
     navigation.navigate('Match Detail', { matchId });
+  };
+
+  const handleDeleteMatch = (matchId: string, deckTitle?: string, close: () => void) => {
+    const matchName = deckTitle ? `match with ${deckTitle}` : 'match';
+    Alert.alert(
+      'Delete Match',
+      `Are you sure you want to delete this ${matchName}?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+          onPress: close,
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteMatch(matchId);
+              showToast('Match deleted', 'success');
+            } catch (error) {
+              showToast('Failed to delete match', 'error');
+            }
+          },
+        },
+      ]
+    );
   };
 
   const availableDecks = decks.filter((d) => !d.archived);
@@ -178,11 +209,15 @@ export default function MatchHistoryScreen() {
           renderItem={({ item }) => {
             const deck = decks.find((d) => d.id === item.myDeckId);
             return (
-              <MatchRow
-                match={item}
-                deckTitle={deck?.title}
-                onPress={() => handleMatchPress(item.id)}
-              />
+              <SwipeableDelete
+                onDelete={(close) => handleDeleteMatch(item.id, deck?.title, close)}
+              >
+                <MatchRow
+                  match={item}
+                  deckTitle={deck?.title}
+                  onPress={() => handleMatchPress(item.id)}
+                />
+              </SwipeableDelete>
             );
           }}
           contentContainerStyle={styles.listContent}

@@ -137,6 +137,10 @@ export class SQLiteEventRepository implements Repository<Event> {
     const existing = await this.get(id);
     if (!existing) return false;
 
+    // Delete all matches associated with this event first
+    await db.runAsync('DELETE FROM matches WHERE eventId = ? AND user_id = ?', [id, userId]);
+
+    // Delete the event
     await db.runAsync('DELETE FROM events WHERE id = ? AND user_id = ?', [id, userId]);
 
     // Remove from calendar index

@@ -6,3 +6,4 @@
 export { KPI } from './KPI';
 export { ListItem } from './ListItem';
 export { FormRow } from './FormRow';
+export { SwipeableDelete } from './SwipeableDelete';

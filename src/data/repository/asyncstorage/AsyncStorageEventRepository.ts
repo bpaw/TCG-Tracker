@@ -1,5 +1,5 @@
 import * as Crypto from 'expo-crypto';
-import { Event } from '../../../domain/types';
+import { Event, Match } from '../../../domain/types';
 import { Repository } from '../interfaces';
 import { getItem, setItem, STORAGE_KEYS } from '../../asyncStorage';
 import * as CalendarRepo from '../../calendarRepo';
@@ -81,6 +81,14 @@ export class AsyncStorageEventRepository implements Repository<Event> {
 
     const eventToRemove = events[index];
 
+    // Delete all matches associated with this event
+    const matches = await getItem<Match[]>(STORAGE_KEYS.MATCHES);
+    if (matches) {
+      const filteredMatches = matches.filter((match) => match.eventId !== id);
+      await setItem(STORAGE_KEYS.MATCHES, filteredMatches);
+    }
+
+    // Delete the event
     events.splice(index, 1);
     await setItem(STORAGE_KEYS.EVENTS, events);
 

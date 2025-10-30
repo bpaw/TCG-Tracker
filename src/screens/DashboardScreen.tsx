@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   useColorScheme,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -13,10 +14,12 @@ import { RootStackParamList } from '../navigation/RootNavigator';
 import { useEventStore } from '../stores/eventStore';
 import { useMatchStore } from '../stores/matchStore';
 import { useThemeStore } from '../stores/themeStore';
+import { useUiStore } from '../stores/uiStore';
 import { formatMatchDate } from '../utils/date';
 import { KPI } from '../components/molecules/KPI';
 import { Button } from '../components/atoms/Button';
 import { Card } from '../components/atoms/Card';
+import { SwipeableDelete } from '../components/molecules/SwipeableDelete';
 import { Title, H2, Body, Caption } from '../components/atoms/Text';
 import WinRateChart from '../components/WinRateChart';
 import { getOverallRecord, getWinRate, getFirstVsSecondSplit, getDailyWinRates } from '../utils/stats';
@@ -29,8 +32,9 @@ export default function DashboardScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { isDark } = useThemeStore();
 
-  const { events, loadEvents, loading } = useEventStore();
+  const { events, loadEvents, deleteEvent, loading } = useEventStore();
   const { matches, loadMatches } = useMatchStore();
+  const { showToast } = useUiStore();
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -133,6 +137,32 @@ export default function DashboardScreen() {
     navigation.navigate('Add Event');
   };
 
+  const handleDeleteEvent = (eventId: string, eventName: string, close: () => void) => {
+    Alert.alert(
+      'Delete Event',
+      `Are you sure you want to delete "${eventName}"? This will also delete all associated rounds.`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+          onPress: close,
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteEvent(eventId);
+              showToast('Event deleted', 'success');
+            } catch (error) {
+              showToast('Failed to delete event', 'error');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   if (loading && events.length === 0) {
     return (
       <View style={styles.loadingContainer}>
@@ -202,28 +232,30 @@ export default function DashboardScreen() {
               const ties = eventMatches.filter((m) => m.result === 'TIE').length;
 
               return (
-                <TouchableOpacity
+                <SwipeableDelete
                   key={event.id}
-                  onPress={() => handleEventPress(event.id)}
+                  onDelete={(close) => handleDeleteEvent(event.id, event.name, close)}
                 >
-                  <Card style={styles.eventCard}>
-                    <View style={styles.eventHeader}>
-                      <Body style={styles.eventName}>{event.name}</Body>
-                      <Caption>{formatMatchDate(event.startDate)}</Caption>
-                    </View>
+                  <TouchableOpacity onPress={() => handleEventPress(event.id)}>
+                    <Card style={styles.eventCard}>
+                      <View style={styles.eventHeader}>
+                        <Body style={styles.eventName}>{event.name}</Body>
+                        <Caption>{formatMatchDate(event.startDate)}</Caption>
+                      </View>
 
-                    <Caption style={styles.eventGame}>{event.game}</Caption>
+                      <Caption style={styles.eventGame}>{event.game}</Caption>
 
-                    <View style={styles.eventStats}>
-                      <Caption>Rounds: {completedRounds}/{event.totalRounds}</Caption>
-                      {eventMatches.length > 0 && (
-                        <Body style={styles.eventRecord}>
-                          {wins}-{losses}{ties > 0 ? `-${ties}` : ''}
-                        </Body>
-                      )}
-                    </View>
-                  </Card>
-                </TouchableOpacity>
+                      <View style={styles.eventStats}>
+                        <Caption>Rounds: {completedRounds}/{event.totalRounds}</Caption>
+                        {eventMatches.length > 0 && (
+                          <Body style={styles.eventRecord}>
+                            {wins}-{losses}{ties > 0 ? `-${ties}` : ''}
+                          </Body>
+                        )}
+                      </View>
+                    </Card>
+                  </TouchableOpacity>
+                </SwipeableDelete>
               );
             })}
           </View>

@@ -18,6 +18,7 @@ import { useTheme } from '../hooks/useTheme';
 import { Title, H2, Body, Caption } from '../components/atoms/Text';
 import { Button } from '../components/atoms/Button';
 import { Card } from '../components/atoms/Card';
+import { SwipeableDelete } from '../components/molecules/SwipeableDelete';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -25,7 +26,7 @@ export default function DecksScreen() {
   const { colors, spacing } = useTheme();
   const navigation = useNavigation<NavigationProp>();
 
-  const { decks, loadDecks, archiveDeck } = useDeckStore();
+  const { decks, loadDecks, archiveDeck, deleteDeck } = useDeckStore();
   const { matches, loadMatches } = useMatchStore();
   const { showToast } = useUiStore();
 
@@ -138,6 +139,32 @@ export default function DecksScreen() {
     );
   };
 
+  const handleDeleteDeck = (deckId: string, deckTitle: string, close: () => void) => {
+    Alert.alert(
+      'Delete Deck',
+      `Are you sure you want to delete "${deckTitle}"?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+          onPress: close,
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteDeck(deckId);
+              showToast('Deck deleted', 'success');
+            } catch (error) {
+              showToast('Failed to delete deck', 'error');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   // Group decks by game
   const decksByGame = decks.reduce((acc, deck) => {
     if (!acc[deck.game]) {
@@ -180,61 +207,65 @@ export default function DecksScreen() {
                 const winRate = getWinRate(deckMatches);
 
                 return (
-                  <Card
+                  <SwipeableDelete
                     key={deck.id}
-                    style={[
-                      styles.deckCard,
-                      deck.archived && styles.deckCardArchived,
-                    ]}
+                    onDelete={(close) => handleDeleteDeck(deck.id, deck.title, close)}
                   >
-                    <View style={styles.deckHeader}>
-                      <View style={styles.deckInfo}>
-                        <Body
-                          style={[
-                            styles.deckTitle,
-                            deck.archived && styles.deckTitleArchived,
-                          ]}
-                        >
-                          {deck.title}
-                          {deck.archived && ' (Archived)'}
-                        </Body>
-                        {deckMatches.length > 0 && (
-                          <Caption style={styles.deckStats}>
-                            <Caption style={{ color: colors.brand.emerald }}>
-                              {winRate.wins}W
+                    <Card
+                      style={[
+                        styles.deckCard,
+                        deck.archived && styles.deckCardArchived,
+                      ]}
+                    >
+                      <View style={styles.deckHeader}>
+                        <View style={styles.deckInfo}>
+                          <Body
+                            style={[
+                              styles.deckTitle,
+                              deck.archived && styles.deckTitleArchived,
+                            ]}
+                          >
+                            {deck.title}
+                            {deck.archived && ' (Archived)'}
+                          </Body>
+                          {deckMatches.length > 0 && (
+                            <Caption style={styles.deckStats}>
+                              <Caption style={{ color: colors.brand.emerald }}>
+                                {winRate.wins}W
+                              </Caption>
+                              -
+                              <Caption style={{ color: colors.brand.coral }}>
+                                {winRate.total - winRate.wins}L
+                              </Caption>
+                              {' '}• {winRate.percentage.toFixed(0)}% WR
                             </Caption>
-                            -
-                            <Caption style={{ color: colors.brand.coral }}>
-                              {winRate.total - winRate.wins}L
-                            </Caption>
-                            {' '}• {winRate.percentage.toFixed(0)}% WR
-                          </Caption>
-                        )}
+                          )}
+                        </View>
                       </View>
-                    </View>
 
-                    {deck.notes && (
-                      <Caption
-                        style={styles.deckNotes}
-                        numberOfLines={2}
-                      >
-                        {deck.notes}
-                      </Caption>
-                    )}
+                      {deck.notes && (
+                        <Caption
+                          style={styles.deckNotes}
+                          numberOfLines={2}
+                        >
+                          {deck.notes}
+                        </Caption>
+                      )}
 
-                    <View style={styles.deckActions}>
-                      <Button
-                        title="Edit"
-                        onPress={() => handleEditDeck(deck.id)}
-                        intent="neutral"
-                      />
-                      <Button
-                        title={deck.archived ? 'Unarchive' : 'Archive'}
-                        onPress={() => handleArchiveDeck(deck)}
-                        intent="neutral"
-                      />
-                    </View>
-                  </Card>
+                      <View style={styles.deckActions}>
+                        <Button
+                          title="Edit"
+                          onPress={() => handleEditDeck(deck.id)}
+                          intent="neutral"
+                        />
+                        <Button
+                          title={deck.archived ? 'Unarchive' : 'Archive'}
+                          onPress={() => handleArchiveDeck(deck)}
+                          intent="neutral"
+                        />
+                      </View>
+                    </Card>
+                  </SwipeableDelete>
                 );
               })}
             </View>

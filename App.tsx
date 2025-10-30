@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { StatusBar, StyleSheet, View, useColorScheme, Text, LogBox } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import RootNavigator from './src/navigation/RootNavigator';
 import { useUiStore } from './src/stores/uiStore';
 import { useThemeStore } from './src/stores/themeStore';
@@ -50,25 +51,27 @@ export default function App() {
   }
 
   return (
-    <SafeAreaProvider>
-      <StatusBar
-        barStyle={isDark ? 'light-content' : 'dark-content'}
-        backgroundColor={isDark ? '#000' : '#fff'}
-      />
-      <RootNavigator />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <StatusBar
+          barStyle={isDark ? 'light-content' : 'dark-content'}
+          backgroundColor={isDark ? '#000' : '#fff'}
+        />
+        <RootNavigator />
 
-      {/* Toast Notification */}
-      {toast?.visible && (
-        <View style={[
-          styles.toast,
-          toast.type === 'success' && styles.toastSuccess,
-          toast.type === 'error' && styles.toastError,
-          toast.type === 'info' && styles.toastInfo,
-        ]}>
-          <Text style={styles.toastText}>{toast.message}</Text>
-        </View>
-      )}
-    </SafeAreaProvider>
+        {/* Toast Notification */}
+        {toast?.visible && (
+          <View style={[
+            styles.toast,
+            toast.type === 'success' && styles.toastSuccess,
+            toast.type === 'error' && styles.toastError,
+            toast.type === 'info' && styles.toastInfo,
+          ]}>
+            <Text style={styles.toastText}>{toast.message}</Text>
+          </View>
+        )}
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 

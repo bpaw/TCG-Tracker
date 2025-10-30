@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Image,
+  Alert,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -14,12 +15,14 @@ import { RootStackParamList } from '../navigation/RootNavigator';
 import { useEventStore } from '../stores/eventStore';
 import { useMatchStore } from '../stores/matchStore';
 import { useDeckStore } from '../stores/deckStore';
+import { useUiStore } from '../stores/uiStore';
 import { formatMatchDate } from '../utils/date';
 import { getLeaderImage, getColorBorderColor } from '../domain/gameTitle/onePieceAssets';
 import { useTheme } from '../hooks/useTheme';
 import { Title, H2, Body, Caption } from '../components/atoms/Text';
 import { Button } from '../components/atoms/Button';
 import { Card } from '../components/atoms/Card';
+import { SwipeableDelete } from '../components/molecules/SwipeableDelete';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Event Detail'>;
 type EventDetailRouteProp = RouteProp<RootStackParamList, 'Event Detail'>;
@@ -31,8 +34,9 @@ export default function EventDetailScreen() {
 
   const { eventId } = route.params;
   const { getEvent, loadEvents } = useEventStore();
-  const { matches, loadMatches } = useMatchStore();
+  const { matches, loadMatches, deleteMatch } = useMatchStore();
   const { decks, loadDecks } = useDeckStore();
+  const { showToast } = useUiStore();
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -227,6 +231,32 @@ export default function EventDetailScreen() {
     navigation.navigate('Match Detail', { matchId });
   };
 
+  const handleDeleteMatch = (matchId: string, roundNumber: number, close: () => void) => {
+    Alert.alert(
+      'Delete Round',
+      `Are you sure you want to delete Round ${roundNumber}?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+          onPress: close,
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteMatch(matchId);
+              showToast('Round deleted', 'success');
+            } catch (error) {
+              showToast('Failed to delete round', 'error');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   if (!event) {
     return (
       <View style={styles.loadingContainer}>
@@ -325,11 +355,12 @@ export default function EventDetailScreen() {
                       const borderColor = getColorBorderColor(match.onePieceColor);
 
                       return (
-                        <TouchableOpacity
+                        <SwipeableDelete
                           key={match.id}
-                          onPress={() => handleMatchPress(match.id)}
+                          onDelete={(close) => handleDeleteMatch(match.id, match.roundNumber, close)}
                         >
-                          <Card style={styles.roundCard}>
+                          <TouchableOpacity onPress={() => handleMatchPress(match.id)}>
+                            <Card style={styles.roundCard}>
                             <View style={styles.onePieceCardLayout}>
                               {/* Left: Leader Image */}
                               <View style={styles.leaderImageContainer}>
@@ -390,17 +421,19 @@ export default function EventDetailScreen() {
                               </View>
                             </View>
                           </Card>
-                        </TouchableOpacity>
+                          </TouchableOpacity>
+                        </SwipeableDelete>
                       );
                     }
 
                     // Default card layout for other games
                     return (
-                      <TouchableOpacity
+                      <SwipeableDelete
                         key={match.id}
-                        onPress={() => handleMatchPress(match.id)}
+                        onDelete={(close) => handleDeleteMatch(match.id, match.roundNumber, close)}
                       >
-                        <Card style={styles.roundCard}>
+                        <TouchableOpacity onPress={() => handleMatchPress(match.id)}>
+                          <Card style={styles.roundCard}>
                           <View style={styles.roundHeader}>
                             <Body weight="bold">
                               Round {match.roundNumber}
@@ -445,7 +478,8 @@ export default function EventDetailScreen() {
                             )}
                           </View>
                         </Card>
-                      </TouchableOpacity>
+                        </TouchableOpacity>
+                      </SwipeableDelete>
                     );
                   })}
                 </View>

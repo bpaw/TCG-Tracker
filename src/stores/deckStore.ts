@@ -13,6 +13,7 @@ interface DeckState {
   createDeck: (data: Omit<Deck, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Deck>;
   updateDeck: (id: string, data: Partial<Deck>) => Promise<void>;
   archiveDeck: (id: string, archived?: boolean) => Promise<void>;
+  deleteDeck: (id: string) => Promise<void>;
   refreshDecks: () => Promise<void>;
 }
 
@@ -81,6 +82,20 @@ export const useDeckStore = create<DeckState>((set, get) => ({
           loading: false,
         }));
       }
+    } catch (error) {
+      set({ error: String(error), loading: false });
+      throw error;
+    }
+  },
+
+  deleteDeck: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      await DeckRepo.remove(id);
+      set((state) => ({
+        decks: state.decks.filter((deck) => deck.id !== id),
+        loading: false,
+      }));
     } catch (error) {
       set({ error: String(error), loading: false });
       throw error;
