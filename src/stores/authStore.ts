@@ -26,6 +26,7 @@ interface AuthState {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
   clearPaywallFlag: () => void;
+  createUserProfile: (userId: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -98,6 +99,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // Get the updated session after sign up
     const { data: { session } } = await supabase.auth.getSession();
 
+    // Create user profile with free subscription
+    if (session?.user?.id) {
+      await get().createUserProfile(session.user.id);
+    }
+
     set({
       session,
       user: session?.user ?? null,
@@ -150,5 +156,33 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   clearPaywallFlag: () => {
     set({ shouldShowPaywall: false });
+  },
+
+  createUserProfile: async (userId: string) => {
+    try {
+      console.log(`[AuthStore] Creating user profile for user ${userId}`);
+
+      const { error } = await supabase
+        .from('user_profiles')
+        .insert({
+          id: userId,
+          subscription_type: 'free',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+      if (error) {
+        // Ignore duplicate key errors (profile already exists)
+        if (error.code !== '23505') {
+          console.error('[AuthStore] Failed to create user profile:', error);
+        } else {
+          console.log('[AuthStore] User profile already exists');
+        }
+      } else {
+        console.log('[AuthStore] User profile created successfully');
+      }
+    } catch (error) {
+      console.error('[AuthStore] Error creating user profile:', error);
+    }
   },
 }));

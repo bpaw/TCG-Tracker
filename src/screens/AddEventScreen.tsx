@@ -21,6 +21,7 @@ import { eventSchema, EventFormData, gameTitles } from '../validation/schemas';
 import { useTheme } from '../hooks/useTheme';
 import { Body, Caption } from '../components/atoms/Text';
 import { Button } from '../components/atoms/Button';
+import { handleSubscriptionError } from '../utils/subscriptionErrors';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Add Event'>;
 
@@ -123,8 +124,7 @@ export default function AddEventScreen() {
       showToast('Event created successfully!', 'success');
       navigation.goBack();
     } catch (error) {
-      console.error('Failed to create event:', error);
-      showToast('Failed to create event', 'error');
+      handleSubscriptionError(error, navigation, showToast, 'Failed to create event');
     }
   };
 

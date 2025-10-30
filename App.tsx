@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StatusBar, StyleSheet, View, useColorScheme, Text } from 'react-native';
+import { StatusBar, StyleSheet, View, useColorScheme, Text, LogBox } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import RootNavigator from './src/navigation/RootNavigator';
 import { useUiStore } from './src/stores/uiStore';
@@ -8,6 +8,9 @@ import { useAuthStore } from './src/stores/authStore';
 import { useStorageStore } from './src/stores/storageStore';
 import { useSubscriptionStore } from './src/stores/subscriptionStore';
 import { initializeConfig } from './src/data/repository/config';
+
+// Ignore subscription limit errors in error overlay (these are expected behavior)
+LogBox.ignoreLogs(['limit reached']);
 
 export default function App() {
   const { isDark, loadTheme } = useThemeStore();

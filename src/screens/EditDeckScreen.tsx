@@ -20,6 +20,7 @@ import { deckSchema, DeckFormData, gameTitles } from '../validation/schemas';
 import { useTheme } from '../hooks/useTheme';
 import { Title, Body, Caption } from '../components/atoms/Text';
 import { Button } from '../components/atoms/Button';
+import { handleSubscriptionError } from '../utils/subscriptionErrors';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Edit Deck'>;
 type EditDeckRouteProp = RouteProp<RootStackParamList, 'Edit Deck'>;
@@ -107,8 +108,7 @@ export default function EditDeckScreen() {
       }
       navigation.goBack();
     } catch (error) {
-      console.error('Failed to save deck:', error);
-      showToast('Failed to save deck', 'error');
+      handleSubscriptionError(error, navigation, showToast, 'Failed to save deck');
     }
   };
 

@@ -31,7 +31,7 @@ export default function ProfileScreen() {
   const { isDark, toggleTheme } = useThemeStore();
   const { user, signOut } = useAuthStore();
   const { storageType, isChangingStorage, setStorageTypeAsync } = useStorageStore();
-  const { subscriptionType, getLimits } = useSubscriptionStore();
+  const { subscriptionType, getLimits, cancelSubscription } = useSubscriptionStore();
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncProgress, setSyncProgress] = useState({ completed: 0, total: 0 });
@@ -265,6 +265,32 @@ export default function ProfileScreen() {
     );
   };
 
+  const handleCancelSubscription = () => {
+    Alert.alert(
+      'Cancel Subscription',
+      'Are you sure you want to cancel your subscription? You will be reverted to the free tier with limited events, decks, and matches. Cloud sync will be disabled.',
+      [
+        { text: 'Keep Subscription', style: 'cancel' },
+        {
+          text: 'Cancel Subscription',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const success = await cancelSubscription();
+              if (success) {
+                Alert.alert('Subscription Cancelled', 'You have been reverted to the free tier. Your data remains safe, but cloud sync is now disabled.');
+              } else {
+                Alert.alert('Error', 'Failed to cancel subscription. Please try again.');
+              }
+            } catch (error) {
+              Alert.alert('Error', 'Failed to cancel subscription');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
@@ -324,7 +350,7 @@ export default function ProfileScreen() {
                 Cloud Sync: {subscriptionType === 'premium' ? 'Enabled' : 'Disabled'}
               </Caption>
             </View>
-            {subscriptionType === 'free' && (
+            {subscriptionType === 'free' ? (
               <>
                 <View style={{ height: 1, backgroundColor: colors.surface[300], marginVertical: spacing.sm }} />
                 <View style={styles.settingInfo}>
@@ -341,6 +367,23 @@ export default function ProfileScreen() {
                     title="View Premium Plans"
                     intent="primary"
                     onPress={() => navigation.navigate('Paywall' as never)}
+                  />
+                </View>
+              </>
+            ) : (
+              <>
+                <View style={{ height: 1, backgroundColor: colors.surface[300], marginVertical: spacing.sm }} />
+                <View style={styles.settingInfo}>
+                  <Body style={{ marginBottom: spacing.xs, fontWeight: '600', color: colors.brand.coral }}>
+                    Manage Subscription
+                  </Body>
+                  <Caption style={{ marginBottom: spacing.md }}>
+                    Cancel your subscription to revert to the free tier. You'll lose access to unlimited items and cloud sync.
+                  </Caption>
+                  <Button
+                    title="Cancel Subscription"
+                    intent="danger"
+                    onPress={handleCancelSubscription}
                   />
                 </View>
               </>

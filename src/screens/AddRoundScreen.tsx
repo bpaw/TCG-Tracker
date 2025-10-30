@@ -36,6 +36,7 @@ import leaders from '../data/_data/leaders.json';
 import { useTheme } from '../hooks/useTheme';
 import { Title, Body, Caption } from '../components/atoms/Text';
 import { Button } from '../components/atoms/Button';
+import { handleSubscriptionError } from '../utils/subscriptionErrors';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Add Round'>;
 type AddRoundRouteProp = RouteProp<RootStackParamList, 'Add Round'>;
@@ -208,8 +209,7 @@ export default function AddRoundScreen() {
       showToast('Round saved successfully!', 'success');
       navigation.goBack();
     } catch (error) {
-      console.error('Failed to save round:', error);
-      showToast('Failed to save round', 'error');
+      handleSubscriptionError(error, navigation, showToast, 'Failed to save round');
     }
   };
 

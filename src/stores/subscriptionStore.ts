@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from './authStore';
+import repositoryFactory from '../data/repository/factory';
 
 // RevenueCat types (will be properly typed when real API keys are added)
 type PurchasesOffering = any;
@@ -43,6 +44,9 @@ interface SubscriptionState {
 
   // Purchase a subscription (stubbed for now)
   purchasePackage: (packageToPurchase: PurchasesPackage) => Promise<boolean>;
+
+  // Cancel subscription
+  cancelSubscription: () => Promise<boolean>;
 
   // Restore purchases
   restorePurchases: () => Promise<boolean>;
@@ -159,6 +163,11 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
       }
 
       set({ subscriptionType: type });
+
+      // Reset repository cache so new storage type is used
+      repositoryFactory.reset();
+      console.log('[SubscriptionStore] Repository cache cleared - storage will switch on next access');
+
       console.log('[SubscriptionStore] Subscription updated successfully');
     } catch (error) {
       console.error('[SubscriptionStore] Error updating subscription:', error);
@@ -186,6 +195,24 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
     } catch (error) {
       console.error('[SubscriptionStore] Purchase failed:', error);
       set({ isPurchasing: false });
+      return false;
+    }
+  },
+
+  cancelSubscription: async () => {
+    try {
+      console.log('[SubscriptionStore] Cancelling subscription...');
+
+      // TODO: Replace with real cancellation flow when Apple Developer account is ready
+      // This would typically involve calling RevenueCat to cancel the subscription
+
+      // Update user profile to free tier
+      await get().updateSubscriptionStatus('free');
+
+      console.log('[SubscriptionStore] Subscription cancelled successfully');
+      return true;
+    } catch (error) {
+      console.error('[SubscriptionStore] Failed to cancel subscription:', error);
       return false;
     }
   },
