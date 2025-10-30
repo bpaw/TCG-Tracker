@@ -1,30 +1,15 @@
 import { Match } from '../../../domain/types';
-import { Repository } from '../interfaces';
+import { SQLiteMatchRepository } from '../sqlite/SQLiteMatchRepository';
+import { BaseCloudRepository } from './BaseCloudRepository';
 
 /**
- * Cloud-based Match Repository (Not Implemented)
+ * Hybrid Cloud Match Repository
  *
- * This is a stub for future cloud storage implementation.
- * When implemented, this would sync data with a remote server/cloud service.
+ * Uses BaseCloudRepository for shared sync logic.
+ * Implements a local-first architecture with cloud sync.
  */
-export class CloudMatchRepository implements Repository<Match> {
-  async list(): Promise<Match[]> {
-    throw new Error('CloudMatchRepository.list() not implemented');
-  }
-
-  async get(id: string): Promise<Match | null> {
-    throw new Error('CloudMatchRepository.get() not implemented');
-  }
-
-  async create(data: Omit<Match, 'id' | 'createdAt' | 'updatedAt'>): Promise<Match> {
-    throw new Error('CloudMatchRepository.create() not implemented');
-  }
-
-  async update(id: string, data: Partial<Match>): Promise<Match | null> {
-    throw new Error('CloudMatchRepository.update() not implemented');
-  }
-
-  async remove(id: string): Promise<boolean> {
-    throw new Error('CloudMatchRepository.remove() not implemented');
+export class CloudMatchRepository extends BaseCloudRepository<Match> {
+  constructor() {
+    super(new SQLiteMatchRepository(), 'matches');
   }
 }

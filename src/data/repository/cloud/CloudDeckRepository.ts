@@ -1,30 +1,15 @@
 import { Deck } from '../../../domain/types';
-import { Repository } from '../interfaces';
+import { SQLiteDeckRepository } from '../sqlite/SQLiteDeckRepository';
+import { BaseCloudRepository } from './BaseCloudRepository';
 
 /**
- * Cloud-based Deck Repository (Not Implemented)
+ * Hybrid Cloud Deck Repository
  *
- * This is a stub for future cloud storage implementation.
- * When implemented, this would sync data with a remote server/cloud service.
+ * Uses BaseCloudRepository for shared sync logic.
+ * Implements a local-first architecture with cloud sync.
  */
-export class CloudDeckRepository implements Repository<Deck> {
-  async list(): Promise<Deck[]> {
-    throw new Error('CloudDeckRepository.list() not implemented');
-  }
-
-  async get(id: string): Promise<Deck | null> {
-    throw new Error('CloudDeckRepository.get() not implemented');
-  }
-
-  async create(data: Omit<Deck, 'id' | 'createdAt' | 'updatedAt'>): Promise<Deck> {
-    throw new Error('CloudDeckRepository.create() not implemented');
-  }
-
-  async update(id: string, data: Partial<Deck>): Promise<Deck | null> {
-    throw new Error('CloudDeckRepository.update() not implemented');
-  }
-
-  async remove(id: string): Promise<boolean> {
-    throw new Error('CloudDeckRepository.remove() not implemented');
+export class CloudDeckRepository extends BaseCloudRepository<Deck> {
+  constructor() {
+    super(new SQLiteDeckRepository(), 'decks');
   }
 }

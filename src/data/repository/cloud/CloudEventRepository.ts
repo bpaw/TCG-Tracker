@@ -1,30 +1,15 @@
 import { Event } from '../../../domain/types';
-import { Repository } from '../interfaces';
+import { SQLiteEventRepository } from '../sqlite/SQLiteEventRepository';
+import { BaseCloudRepository } from './BaseCloudRepository';
 
 /**
- * Cloud-based Event Repository (Not Implemented)
+ * Hybrid Cloud Event Repository
  *
- * This is a stub for future cloud storage implementation.
- * When implemented, this would sync data with a remote server/cloud service.
+ * Uses BaseCloudRepository for shared sync logic.
+ * Implements a local-first architecture with cloud sync.
  */
-export class CloudEventRepository implements Repository<Event> {
-  async list(): Promise<Event[]> {
-    throw new Error('CloudEventRepository.list() not implemented');
-  }
-
-  async get(id: string): Promise<Event | null> {
-    throw new Error('CloudEventRepository.get() not implemented');
-  }
-
-  async create(data: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>): Promise<Event> {
-    throw new Error('CloudEventRepository.create() not implemented');
-  }
-
-  async update(id: string, data: Partial<Event>): Promise<Event | null> {
-    throw new Error('CloudEventRepository.update() not implemented');
-  }
-
-  async remove(id: string): Promise<boolean> {
-    throw new Error('CloudEventRepository.remove() not implemented');
+export class CloudEventRepository extends BaseCloudRepository<Event> {
+  constructor() {
+    super(new SQLiteEventRepository(), 'events');
   }
 }

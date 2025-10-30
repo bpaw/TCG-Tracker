@@ -5,16 +5,25 @@ import RootNavigator from './src/navigation/RootNavigator';
 import { useUiStore } from './src/stores/uiStore';
 import { useThemeStore } from './src/stores/themeStore';
 import { useAuthStore } from './src/stores/authStore';
+import { useStorageStore } from './src/stores/storageStore';
+import { initializeConfig } from './src/data/repository/config';
 
 export default function App() {
   const { isDark, loadTheme } = useThemeStore();
   const { initialized, initialize, toast, hideToast } = useUiStore();
   const { initialize: initializeAuth } = useAuthStore();
+  const { loadStorageType } = useStorageStore();
 
   useEffect(() => {
-    loadTheme();
-    initialize();
-    initializeAuth();
+    const initializeApp = async () => {
+      loadTheme();
+      initialize();
+      initializeAuth();
+      await initializeConfig(); // Load storage preference from AsyncStorage
+      loadStorageType(); // Sync store with loaded config
+    };
+
+    initializeApp();
   }, []);
 
   if (!initialized) {
