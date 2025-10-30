@@ -104,13 +104,16 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   loadSubscriptionStatus: async () => {
     try {
       const user = useAuthStore.getState().user;
+      console.log('[SubscriptionStore] Loading subscription status...');
+      console.log('[SubscriptionStore] User:', user ? { id: user.id, email: user.email } : 'null');
+
       if (!user) {
         console.log('[SubscriptionStore] No user, defaulting to free');
         set({ subscriptionType: 'free' });
         return;
       }
 
-      console.log('[SubscriptionStore] Loading subscription status from Supabase...');
+      console.log(`[SubscriptionStore] Querying user_profiles for user ${user.id}`);
 
       const { data, error } = await supabase
         .from('user_profiles')
@@ -118,13 +121,16 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
         .eq('id', user.id)
         .single();
 
+      console.log('[SubscriptionStore] Query result:', { data, error });
+
       if (error) {
         if (error.code === 'PGRST116') {
           // Row doesn't exist, create it with free tier
-          console.log('[SubscriptionStore] No profile found, creating with free tier');
+          console.log('[SubscriptionStore] No profile found (PGRST116), creating with free tier');
           await get().updateSubscriptionStatus('free');
         } else {
           console.error('[SubscriptionStore] Failed to load subscription:', error);
+          console.error('[SubscriptionStore] Error details:', JSON.stringify(error));
           set({ subscriptionType: 'free' });
         }
         return;

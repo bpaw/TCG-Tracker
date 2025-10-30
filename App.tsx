@@ -21,12 +21,19 @@ export default function App() {
 
   useEffect(() => {
     const initializeApp = async () => {
+      // Synchronous initialization
       loadTheme();
       initialize();
-      initializeAuth();
-      await initializeConfig(); // Load storage preference from AsyncStorage
-      loadStorageType(); // Sync store with loaded config
-      await initializeSubscription(); // Initialize RevenueCat and load subscription status
+
+      // Run async initialization in parallel
+      await Promise.all([
+        initializeAuth(),
+        initializeConfig(),
+      ]);
+
+      // Run dependent initialization after their dependencies are ready
+      loadStorageType(); // Depends on initializeConfig
+      await initializeSubscription(); // Depends on initializeAuth
     };
 
     initializeApp();
