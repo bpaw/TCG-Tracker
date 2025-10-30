@@ -1,7 +1,17 @@
 import { format, formatDistanceToNow, isToday, isYesterday } from 'date-fns';
 
 export function formatMatchDate(dateString: string): string {
-  const date = new Date(dateString);
+  // Handle date-only strings (YYYY-MM-DD) by parsing in local timezone
+  // to avoid UTC midnight conversion issues
+  let date: Date;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    // Date-only format: parse as local time
+    const [year, month, day] = dateString.split('-').map(Number);
+    date = new Date(year, month - 1, day);
+  } else {
+    // Full ISO string with time: parse normally
+    date = new Date(dateString);
+  }
 
   if (isToday(date)) {
     return 'Today';
