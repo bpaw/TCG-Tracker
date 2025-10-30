@@ -144,6 +144,16 @@ export function createStyles(isDark: boolean) {
     fontWeight: typography.fontWeight.medium,
   },
 
+  // Highlight / Active states
+  highlightEmerald: {
+    backgroundColor: `${colors.brand.emerald}33`, // 20% opacity
+    borderWidth: 2,
+    borderColor: colors.brand.emerald,
+  },
+  highlightEmeraldText: {
+    color: colors.brand.emerald,
+  },
+
   // Layout helpers
   row: {
     flexDirection: 'row',

@@ -200,8 +200,14 @@ export default function DecksScreen() {
                         </Body>
                         {deckMatches.length > 0 && (
                           <Caption style={styles.deckStats}>
-                            {winRate.wins}W-{winRate.total - winRate.wins}L •{' '}
-                            {winRate.percentage.toFixed(0)}% WR
+                            <Caption style={{ color: colors.brand.emerald }}>
+                              {winRate.wins}W
+                            </Caption>
+                            -
+                            <Caption style={{ color: colors.brand.coral }}>
+                              {winRate.total - winRate.wins}L
+                            </Caption>
+                            {' '}• {winRate.percentage.toFixed(0)}% WR
                           </Caption>
                         )}
                       </View>

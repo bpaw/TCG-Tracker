@@ -23,6 +23,7 @@ export default function CalendarScreen() {
   const { matches, loadMatches } = useMatchStore();
   const [calendarData, setCalendarData] = useState<Record<string, DateCalendar>>({});
   const [selectedDateData, setSelectedDateData] = useState<DateCalendar | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -169,9 +170,21 @@ export default function CalendarScreen() {
     }
   });
 
+  // Add selected date marking with border (not fill)
+  if (selectedDate) {
+    // For dates with existing dots, we need to preserve them
+    const existingMarking = markedDates[selectedDate];
+    markedDates[selectedDate] = {
+      ...existingMarking,
+      selected: true,
+      selectedColor: colors.brand.emerald + '20', // Very light emerald background (12% opacity)
+    };
+  }
+
   const handleDayPress = async (day: DateData) => {
     const dateData = await getCalendarForDate(day.dateString);
     setSelectedDateData(dateData);
+    setSelectedDate(day.dateString);
   };
 
   return (
@@ -188,13 +201,13 @@ export default function CalendarScreen() {
             backgroundColor: colors.surface[100],
             calendarBackground: colors.surface[100],
             textSectionTitleColor: colors.text.secondary,
-            selectedDayBackgroundColor: colors.brand.violet,
-            selectedDayTextColor: colors.text.primary,
+            selectedDayBackgroundColor: 'transparent',
+            selectedDayTextColor: colors.brand.emerald,
             todayTextColor: colors.brand.violet,
             dayTextColor: colors.text.primary,
             textDisabledColor: colors.text.muted,
             dotColor: colors.brand.violet,
-            selectedDotColor: colors.text.primary,
+            selectedDotColor: colors.brand.emerald,
             arrowColor: colors.brand.violet,
             monthTextColor: colors.text.primary,
             indicatorColor: colors.brand.violet,
